@@ -1,8 +1,29 @@
 # Getting Trackly Online — A Complete Beginner's Guide
 
+# Getting Trackly Online — A Complete Beginner's Guide
+
 You don't need to know how to code for this. Every step below uses a
 website with buttons to click — no typing commands, no "terminal." It
-will take about 45–60 minutes the first time. Do the steps in order.
+will take about 45–60 minutes the first time. Do the steps **in order**,
+and don't skip ahead — later parts assume you've finished the earlier
+ones.
+
+## Contents
+
+1. [What you're setting up](#what-youre-setting-up)
+2. [A few words you'll see](#a-few-words-youll-see)
+3. [Before you start](#before-you-start)
+4. [Part 1 — Create your accounts](#part-1--create-your-accounts)
+5. [Part 2 — Get the code onto your computer](#part-2--get-the-code-onto-your-computer)
+6. [Part 3 — Put the code on GitHub](#part-3--put-the-code-on-github-using-github-desktop-no-typing)
+7. [Part 4 — Create your database](#part-4--create-your-database-supabase)
+8. [Part 5 — Make two secret passwords](#part-5--make-up-two-secret-passwords-for-the-app-itself)
+9. [Part 6 — Deploy on Vercel](#part-6--deploy-the-website-on-vercel)
+10. [Part 7 — Create your teacher account](#part-7--create-your-teacher-account)
+11. [Optional: Email notifications](#optional-email-notifications-deadline-reminders-new-lesson-emails)
+12. [A few things worth knowing](#a-few-things-worth-knowing)
+13. [Troubleshooting](#troubleshooting)
+14. [Making changes later](#making-changes-later)
 
 ---
 
@@ -15,6 +36,36 @@ Three free accounts, each doing one job:
 | **GitHub** | Stores your website's code | Free |
 | **Supabase** | Your database (where lessons, students, grades live) + file storage | Free |
 | **Vercel** | Runs your website and makes it live on the internet | Free |
+
+## A few words you'll see
+
+You don't need to memorize these — just refer back here if a term
+trips you up.
+
+- **Repository ("repo")**: a project folder that lives on GitHub.
+  Yours will be called `trackly`.
+- **Environment variable**: a setting the website reads when it starts
+  up — things like your database address or secret keys. You'll type
+  these into a form on Vercel; you're not editing any files.
+- **Deploy**: the process of Vercel taking your code and turning it
+  into a live, working website with a real address.
+- **Database**: where all the actual data lives — every student,
+  lesson, grade, and announcement. Supabase hosts this for you.
+- **API key / secret / token**: a password-like string that lets one
+  service (like Vercel) securely talk to another (like Supabase).
+  Treat these like passwords — don't share them publicly.
+
+## Before you start
+
+Make sure you have:
+
+- [ ] A computer (Windows or Mac) with a web browser
+- [ ] An email address you can access to verify new accounts
+- [ ] The project zip file I gave you, saved somewhere you can find it
+- [ ] About an hour of uninterrupted time for the first setup
+
+Nothing else. No software needs to be installed except one free app in
+Part 3 (GitHub Desktop).
 
 ---
 
@@ -76,24 +127,32 @@ until you want to make future changes (see the very last section).
    - Region: pick whichever is closest to you.
    - Click **Create new project**. Wait 1–2 minutes while it sets up.
 2. Once it's ready, click the **Connect** button near the top of the
-   page (or find **Project Settings → Database** in the left sidebar).
-3. Look for **Connection string** and choose the **URI** tab, then pick
-   the option labeled **Transaction pooler** (it usually uses port
-   `6543` — this version works better with how the website connects).
-4. Copy that connection string. It looks like:
-   `postgresql://postgres.xxxxx:[YOUR-PASSWORD]@aws-...supabase.com:6543/postgres`
-5. Replace `[YOUR-PASSWORD]` in that string with the database password
-   you copied in step 1. Save this full string somewhere — this is your
-   **`DATABASE_URL`**, and you'll paste it into Vercel in Part 6.
+   page. A window titled "Connect to your project" opens with a row of
+   tabs: Framework, Server, Direct connection, ORM, MCP.
+3. Click the **ORM** tab (the one with the plug icon, labeled
+   "Third-party library").
+4. Where it says **Tool**, choose **Prisma** from the dropdown if it
+   isn't already selected.
+5. You'll now see two separate connection strings — copy **both** of
+   them somewhere safe, exactly as shown:
+   - One starts a line with `DATABASE_URL=` — this is the **pooled**
+     connection (used while the site is running).
+   - One starts a line with `DIRECT_URL=` — this is the **direct**
+     connection (used once, when the site's database tables are first
+     created).
+6. Both strings contain `[YOUR-PASSWORD]` as a placeholder — replace it
+   in **both** strings with the database password you copied in step 1.
+   Save both finished strings — you'll paste them into Vercel in Part 6
+   as `DATABASE_URL` and `DIRECT_URL`.
 
 ### Turn on file storage (for resources, images, submissions)
 
-6. In the Supabase left sidebar, click **Storage**.
-7. Click **New bucket**. Name it exactly: `trackly-uploads`
-8. Toggle it to **Public bucket** (so uploaded files can be viewed/
+7. In the Supabase left sidebar, click **Storage**.
+8. Click **New bucket**. Name it exactly: `trackly-uploads`
+9. Toggle it to **Public bucket** (so uploaded files can be viewed/
    downloaded) → click **Create bucket**.
-9. In the left sidebar, click **Project Settings → API**.
-10. You'll need three values from this page in Part 6 — copy each into
+10. In the left sidebar, click **Project Settings → API**.
+11. You'll need three values from this page in Part 6 — copy each into
     your notes:
     - **Project URL** (this is your `SUPABASE_URL` and
       `NEXT_PUBLIC_SUPABASE_URL` — same value, used twice)
@@ -132,7 +191,8 @@ random strings and save both. Easiest way with no terminal:
 
    | Name | Value |
    |---|---|
-   | `DATABASE_URL` | the Supabase connection string from Part 4 |
+   | `DATABASE_URL` | the pooled connection string from Part 4 |
+   | `DIRECT_URL` | the direct connection string from Part 4 |
    | `NEXTAUTH_URL` | leave this for now — see step 8 below |
    | `NEXTAUTH_SECRET` | the first random string from Part 5 |
    | `CRON_SECRET` | the second random string from Part 5 |
@@ -211,6 +271,58 @@ add one more free account:
   need to understand it — just copy the red error text and share it
   with whoever's helping you fix it (including me, in a future
   conversation).
+
+---
+
+## Troubleshooting
+
+**The Supabase "Connect" window doesn't look like Part 4 describes**
+Supabase updates this screen occasionally. As long as you can find a
+tab or option that mentions **Prisma** (usually under an "ORM" tab),
+you're in the right place — it will always give you two strings, one
+for `DATABASE_URL` and one for `DIRECT_URL`. If you genuinely can't
+find a Prisma option, use the **Direct connection** tab instead, copy
+that single string, and paste that same value into both
+`DATABASE_URL` and `DIRECT_URL` in Vercel — it'll still work, just
+slightly less efficient at handling lots of visitors at once.
+
+**"Invalid Credentials" or can't log in after registering**
+Double-check you're using the same email/password you registered with.
+If you're testing with two accounts (a teacher and a student), make
+sure you're not still logged in as the other one — log out first.
+
+**The site loads but looks broken / unstyled**
+This usually means the deployment is still finishing, or a previous
+deploy failed. Go to Vercel → your project → **Deployments** and check
+the top one says "Ready" with a green checkmark. If it says "Error,"
+click it → **Build Logs** and look for a red line — it usually names a
+missing environment variable (double-check you added all 8 from Part
+6, with no typos in the names).
+
+**"Internal Server Error" when creating a class, lesson, etc.**
+Almost always a `DATABASE_URL` problem. Go back to Supabase → Project
+Settings → Database → Connection string, and re-copy it carefully —
+it's easy to miss replacing `[YOUR-PASSWORD]` with your actual
+password. Update it in Vercel → Settings → Environment Variables, then
+redeploy (Part 6, step 9).
+
+**File uploads fail**
+Confirm in Supabase → Storage that a bucket named exactly
+`trackly-uploads` exists and is set to **Public**. Also double-check
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and the two
+`NEXT_PUBLIC_...` variants are all set correctly in Vercel.
+
+**You changed an environment variable but nothing changed on the site**
+Environment variable edits don't apply automatically to a site that's
+already live — you need to trigger a new deploy. Vercel → Deployments
+→ three dots on the top one → **Redeploy**.
+
+**You're stuck on something not listed here**
+Go to Vercel → Deployments → click the relevant deployment → **Build
+Logs** (if it's a deploy-time problem) or **Runtime Logs** (if the site
+loads but a specific action fails). Copy the error text and share it
+with me or another developer — you don't need to understand it
+yourself, just relay it.
 
 ---
 
