@@ -39,13 +39,13 @@ export async function sendPasswordResetEmail(to: string, token: string) {
   );
 }
 
-export async function sendNewLessonEmail(to: string, lessonTitle: string, lessonId: string, dueDate: Date) {
+export async function sendNewLessonEmail(to: string, lessonTitle: string, lessonId: string, dueDate: Date | null) {
   const link = `${APP_URL}/lessons/${lessonId}`;
   await send(
     to,
     `New lesson: ${lessonTitle}`,
     `<p>A new lesson has been posted: <strong>${lessonTitle}</strong>.</p>
-     <p>Due: ${dueDate.toLocaleString()}</p>
+     ${dueDate ? `<p>Due: ${dueDate.toLocaleString()}</p>` : ""}
      <p><a href="${link}">View lesson</a></p>`
   );
 }
