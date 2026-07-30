@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;      /* #F8FAFC */
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;              /* white */
+    --card-foreground: 222 47% 11%;
+    --primary: 217 91% 53%;         /* #2563EB */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 217 91% 96%;
+    --accent-foreground: 217 91% 30%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 53%;
+  }
+
+  .dark {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 8%;
+    --secondary: 222 30% 16%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 30% 16%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 60% 20%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 30% 20%;
+    --input: 222 30% 20%;
+    --ring: 217 91% 60%;
+  }
+
+  /* Accent color presets — set via data-theme on <html>, chosen on the Profile page. */
+  [data-theme="purple"] {
+    --primary: 262 83% 58%;
+    --ring: 262 83% 58%;
+    --accent: 262 83% 96%;
+    --accent-foreground: 262 83% 30%;
+  }
+  [data-theme="purple"].dark {
+    --primary: 262 83% 68%;
+    --ring: 262 83% 68%;
+    --accent: 262 50% 22%;
+  }
+
+  [data-theme="green"] {
+    --primary: 142 71% 40%;
+    --ring: 142 71% 40%;
+    --accent: 142 71% 95%;
+    --accent-foreground: 142 71% 25%;
+  }
+  [data-theme="green"].dark {
+    --primary: 142 60% 52%;
+    --ring: 142 60% 52%;
+    --accent: 142 40% 20%;
+  }
+
+  [data-theme="rose"] {
+    --primary: 346 77% 50%;
+    --ring: 346 77% 50%;
+    --accent: 346 77% 96%;
+    --accent-foreground: 346 77% 30%;
+  }
+  [data-theme="rose"].dark {
+    --primary: 346 77% 62%;
+    --ring: 346 77% 62%;
+    --accent: 346 40% 22%;
+  }
+
+  [data-theme="amber"] {
+    --primary: 38 92% 50%;
+    --ring: 38 92% 50%;
+    --accent: 38 92% 95%;
+    --accent-foreground: 38 92% 28%;
+  }
+  [data-theme="amber"].dark {
+    --primary: 38 92% 58%;
+    --ring: 38 92% 58%;
+    --accent: 38 60% 20%;
+  }
+
+  [data-theme="slate"] {
+    --primary: 215 25% 35%;
+    --ring: 215 25% 35%;
+    --accent: 215 25% 95%;
+    --accent-foreground: 215 25% 25%;
+  }
+  [data-theme="slate"].dark {
+    --primary: 215 20% 65%;
+    --ring: 215 20% 65%;
+    --accent: 215 20% 22%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .card-shadow {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+}

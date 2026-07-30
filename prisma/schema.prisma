@@ -1,0 +1,546 @@
+// ============================================================
+// Trackly — Prisma Schema
+// GLOW Pathways Learning Management & Progress Tracking System
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------
+// Enums
+// ------------------------------------------------------------
+
+enum Role {
+  STUDENT
+  TEACHER
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  LATE
+  REVIEWED
+  GRADED
+  RETURNED
+}
+
+enum NotificationType {
+  NEW_LESSON
+  LESSON_PUBLISHED
+  DEADLINE_REMINDER
+  GRADE_RELEASED
+  FEEDBACK_POSTED
+  ANNOUNCEMENT
+  SUBMISSION_RECEIVED
+  LATE_SUBMISSION
+  STUDENT_COMMENT
+}
+
+// Lesson lifecycle. Draft -> (Scheduled ->) Published -> Closed -> Archived.
+// Scheduled means a future publishAt is set on the Lesson itself; a cron
+// job flips status to Published (and later Closed) automatically.
+enum LessonStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum AnnouncementPriority {
+  NORMAL
+  IMPORTANT
+  URGENT
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  EXPIRED
+}
+
+enum ClassStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+// ------------------------------------------------------------
+// Core identity
+// ------------------------------------------------------------
+
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  passwordHash        String
+  role                Role
+  firstName           String
+  middleName          String?
+  lastName            String
+  profilePictureUrl    String?
+  biography           String?
+  darkMode            Boolean   @default(false)
+  themeColor          String    @default("blue")
+  notificationsOptIn  Boolean   @default(true)
+  emailVerified       DateTime?
+  emailVerifyToken    String?
+  resetToken          String?
+  resetTokenExpiresAt DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  studentProfile   StudentProfile?
+  teacherProfile   TeacherProfile?
+  sessions         Session[]
+  notifications    Notification[]
+  activityLogs     ActivityLog[]
+  announcementsRead AnnouncementRead[]
+
+  @@index([role])
+  @@map("users")
+}
+
+model StudentProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentId   String   @unique
+  gradeLevel  String
+  section     String
+  classId     String?
+  class       Class?   @relation(fields: [classId], references: [id])
+
+  enrollment       Enrollment?
+  submissions      Submission[]
+  progress         Progress[]
+  achievements     StudentAchievement[]
+  submissionComments SubmissionComment[]
+  lessonAssignments  LessonAssignment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([classId])
+  @@map("student_profiles")
+}
+
+model TeacherProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+
+  classes       Class[]
+  lessons       Lesson[]
+  announcements Announcement[]
+  gradesGiven   Grade[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("teacher_profiles")
+}
+
+// ------------------------------------------------------------
+// Classes & enrollment
+// ------------------------------------------------------------
+
+model Class {
+  id          String      @id @default(cuid())
+  name        String
+  gradeLevel  String
+  section     String
+  status      ClassStatus @default(ACTIVE)
+  teacherId   String
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id])
+
+  students          StudentProfile[]
+  enrollments       Enrollment[]
+  lessonAssignments LessonAssignment[]
+  announcements     Announcement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teacherId])
+  @@map("classes")
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  studentId String   @unique
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classId   String
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime @default(now())
+
+  @@index([classId])
+  @@map("enrollments")
+}
+
+// ------------------------------------------------------------
+// GLOW Pathways
+// ------------------------------------------------------------
+
+model Pathway {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  icon        String
+  color       String
+  order       Int      @default(0)
+
+  lessonPathways LessonPathway[]
+  progress       Progress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("pathways")
+}
+
+// Per-student, per-pathway rollup across all lessons (unchanged shape,
+// still fed by LessonPathway completions instead of Assignment ones).
+model Progress {
+  id                    String   @id @default(cuid())
+  studentId             String
+  student               StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  pathwayId             String
+  pathway               Pathway  @relation(fields: [pathwayId], references: [id], onDelete: Cascade)
+  activitiesCompleted   Int      @default(0)
+  activitiesTotal       Int      @default(0)
+  completionPercentage  Float    @default(0)
+  updatedAt             DateTime @updatedAt
+
+  @@unique([studentId, pathwayId])
+  @@index([pathwayId])
+  @@map("progress")
+}
+
+// ------------------------------------------------------------
+// Lessons — the top-level organizational unit.
+// A Lesson is created by a teacher, carries resources, and bundles one
+// or more GLOW Pathways as configurable activities (LessonPathway).
+// ------------------------------------------------------------
+
+model Lesson {
+  id          String       @id @default(cuid())
+  title       String
+  description String       @db.Text
+  objectives  String?      @db.Text
+  subject     String?
+  teacherId   String
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id])
+
+  status            LessonStatus @default(DRAFT)
+  availableAt       DateTime?    // when students may start viewing/working
+  dueDate           DateTime?
+  publishAt         DateTime?    // scheduled publish time (status = SCHEDULED until then)
+  closeAt           DateTime?    // scheduled auto-close time (optional)
+  publishedAt        DateTime?   // actual time it went live
+  timezone          String       @default("UTC")
+
+  duplicatedFromId String?
+
+  resources   LessonResource[]
+  pathways    LessonPathway[]
+  assignments LessonAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teacherId])
+  @@index([status])
+  @@map("lessons")
+}
+
+// Which classes / individual students a lesson has been assigned to.
+// A row with classId set targets the whole class; a row with studentId
+// set (classId null) targets one individual student.
+model LessonAssignment {
+  id        String   @id @default(cuid())
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  classId   String?
+  class     Class?   @relation(fields: [classId], references: [id])
+  studentId String?
+  student   StudentProfile? @relation(fields: [studentId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([lessonId])
+  @@index([classId])
+  @@index([studentId])
+  @@map("lesson_assignments")
+}
+
+// A GLOW Pathway attached to a lesson, with its own teacher-configured
+// instructions/rubric/points — this is the "activity" students complete.
+// Submissions and Grades now hang off this join row rather than a
+// standalone Assignment.
+model LessonPathway {
+  id                String   @id @default(cuid())
+  lessonId          String
+  lesson            Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  pathwayId         String
+  pathway           Pathway  @relation(fields: [pathwayId], references: [id])
+
+  title             String
+  instructions      String   @db.Text
+  requirements      String?  @db.Text
+  rubric            String?  @db.Text
+  points            Int      @default(100)
+  dueDateOverride   DateTime?
+  allowResubmission Boolean  @default(false)
+  required          Boolean  @default(true)
+  order             Int      @default(0)
+
+  submissions Submission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([lessonId])
+  @@index([pathwayId])
+  @@map("lesson_pathways")
+}
+
+// Learning materials attached directly to a lesson (not a specific
+// pathway) — the "Resources" section students see before starting.
+model LessonResource {
+  id            String   @id @default(cuid())
+  lessonId      String
+  lesson        Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  fileName      String
+  fileUrl       String
+  fileType      String
+  fileSizeBytes Int
+  description   String?
+  order         Int      @default(0)
+  uploadedAt    DateTime @default(now())
+
+  @@index([lessonId])
+  @@map("lesson_resources")
+}
+
+model Submission {
+  id              String           @id @default(cuid())
+  lessonPathwayId String
+  lessonPathway   LessonPathway    @relation(fields: [lessonPathwayId], references: [id], onDelete: Cascade)
+  studentId       String
+  student         StudentProfile   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status       SubmissionStatus @default(DRAFT)
+  submittedAt  DateTime?
+  isLate       Boolean          @default(false)
+
+  files    SubmissionFile[]
+  comments SubmissionComment[]
+  grade    Grade?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([lessonPathwayId, studentId])
+  @@index([studentId])
+  @@index([status])
+  @@map("submissions")
+}
+
+model SubmissionFile {
+  id            String     @id @default(cuid())
+  submissionId  String
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  fileName      String
+  fileUrl       String
+  fileType      String
+  fileSizeBytes Int
+  uploadedAt    DateTime   @default(now())
+
+  @@index([submissionId])
+  @@map("submission_files")
+}
+
+model SubmissionComment {
+  id           String         @id @default(cuid())
+  submissionId String
+  submission   Submission     @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  studentId    String?
+  student      StudentProfile? @relation(fields: [studentId], references: [id])
+  body         String         @db.Text
+  createdAt    DateTime       @default(now())
+
+  @@index([submissionId])
+  @@map("submission_comments")
+}
+
+model Grade {
+  id             String     @id @default(cuid())
+  submissionId   String     @unique
+  submission     Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  score          Float
+  feedback       String?    @db.Text
+  feedbackFileUrl String?
+  gradedById     String
+  gradedBy       TeacherProfile @relation(fields: [gradedById], references: [id])
+  released       Boolean    @default(false)
+  gradedAt       DateTime   @default(now())
+
+  @@map("grades")
+}
+
+// ------------------------------------------------------------
+// Announcements
+// ------------------------------------------------------------
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  body        String    @db.Text
+  classId     String?
+  class       Class?    @relation(fields: [classId], references: [id])
+  studentId   String?   // individual-student targeting (optional, in addition to classId)
+  teacherId   String
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id])
+  pinned      Boolean   @default(false)
+  priority    AnnouncementPriority @default(NORMAL)
+  status      AnnouncementStatus   @default(DRAFT)
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  expiresAt   DateTime?
+
+  images      AnnouncementImage[]
+  attachments AnnouncementAttachment[]
+  reads       AnnouncementRead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([classId])
+  @@index([status])
+  @@map("announcements")
+}
+
+model AnnouncementImage {
+  id             String       @id @default(cuid())
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  imageUrl       String
+  order          Int          @default(0)
+  uploadedAt     DateTime     @default(now())
+
+  @@index([announcementId])
+  @@map("announcement_images")
+}
+
+model AnnouncementAttachment {
+  id             String       @id @default(cuid())
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  fileName       String
+  fileUrl        String
+  fileType       String
+  fileSizeBytes  Int
+  uploadedAt     DateTime     @default(now())
+
+  @@index([announcementId])
+  @@map("announcement_attachments")
+}
+
+model AnnouncementRead {
+  id             String       @id @default(cuid())
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt         DateTime     @default(now())
+
+  @@unique([announcementId, userId])
+  @@map("announcement_reads")
+}
+
+// ------------------------------------------------------------
+// Notifications
+// ------------------------------------------------------------
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  link      String?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+// ------------------------------------------------------------
+// Achievements
+// ------------------------------------------------------------
+
+model Achievement {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g. FIRST_SUBMISSION
+  name        String
+  description String
+  icon        String
+
+  students StudentAchievement[]
+
+  @@map("achievements")
+}
+
+model StudentAchievement {
+  id            String      @id @default(cuid())
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  earnedAt      DateTime    @default(now())
+
+  @@unique([studentId, achievementId])
+  @@map("student_achievements")
+}
+
+// ------------------------------------------------------------
+// Auth sessions (NextAuth), activity logs, settings
+// ------------------------------------------------------------
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+
+  @@map("sessions")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  metadata  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("activity_logs")
+}
+
+model Settings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+
+  @@map("settings")
+}
