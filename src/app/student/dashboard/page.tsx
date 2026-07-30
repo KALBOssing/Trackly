@@ -158,7 +158,7 @@ export default async function StudentDashboardPage() {
                 );
               })}
               {upcomingLessons.length === 0 && (
-                <p className="text-sm text-muted-foreground">Nothing due soon — you're all caught up.</p>
+                <p className="text-sm text-muted-foreground">Nothing due soon — you&apos;re all caught up.</p>
               )}
             </CardContent>
           </Card>

@@ -83,7 +83,7 @@ export function GlobalSearch() {
 
       {open && query.trim().length >= 2 && !loading && results.length === 0 && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-card p-3 text-sm text-muted-foreground shadow-md">
-          No results for "{query}"
+          No results for &quot;{query}&quot;
         </div>
       )}
     </div>

@@ -29,7 +29,7 @@ export default async function SettingsPage() {
             <CardTitle>Coming soon</CardTitle>
             <CardDescription>
               School-wide settings (grading scales, term dates, integrations) will land in a later
-              phase — teachers can't modify system settings or other teacher accounts by design.
+              phase — teachers can&apos;t modify system settings or other teacher accounts by design.
             </CardDescription>
           </CardHeader>
         </Card>

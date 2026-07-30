@@ -151,14 +151,26 @@ until you want to make future changes (see the very last section).
 8. Click **New bucket**. Name it exactly: `trackly-uploads`
 9. Toggle it to **Public bucket** (so uploaded files can be viewed/
    downloaded) → click **Create bucket**.
-10. In the left sidebar, click **Project Settings → API**.
-11. You'll need three values from this page in Part 6 — copy each into
-    your notes:
-    - **Project URL** (this is your `SUPABASE_URL` and
-      `NEXT_PUBLIC_SUPABASE_URL` — same value, used twice)
-    - **anon public** key (this is your `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
-    - **service_role** key (this is your `SUPABASE_SERVICE_ROLE_KEY` —
-      click "Reveal" to see it). Keep this one especially private.
+10. In the left sidebar, click **Project Settings** (near the bottom).
+    You'll see a menu split into sections like "Configuration" and
+    "Integrations."
+11. Click **Data API** (under "Integrations"). Near the top of that
+    page, copy the **Project URL** — it looks like
+    `https://xxxxx.supabase.co`. Save it under two names: this is both
+    your `SUPABASE_URL` and your `NEXT_PUBLIC_SUPABASE_URL` (same
+    value, needed in two places later).
+12. Go back to **Project Settings**, then click **API Keys** (under
+    "Configuration"). You'll see two keys:
+    - the **anon** / **public** key → save this as
+      `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+    - the **service_role** / **secret** key (click to reveal it) →
+      save this as `SUPABASE_SERVICE_ROLE_KEY`. Keep this one
+      especially private — don't share it or paste it anywhere public.
+
+    (Supabase has renamed these on some newer projects to
+    "publishable" and "secret" — if you see those names instead, the
+    publishable one is your anon key, and the secret one is your
+    service_role key.)
 
 ---
 

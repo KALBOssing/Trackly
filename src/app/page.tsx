@@ -217,7 +217,7 @@ export default function LandingPage() {
             ].map((t) => (
               <Card key={t.name}>
                 <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground">"{t.quote}"</p>
+                  <p className="text-sm text-muted-foreground">&quot;{t.quote}&quot;</p>
                   <p className="mt-4 text-sm font-medium">{t.name}</p>
                   <p className="text-xs text-muted-foreground">{t.role}</p>
                 </CardContent>
