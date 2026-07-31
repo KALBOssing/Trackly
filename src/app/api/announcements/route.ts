@@ -72,6 +72,12 @@ export async function POST(req: Request) {
       expiresAt: parsed.data.expiresAt ?? null,
       publishedAt: status === "PUBLISHED" ? new Date() : null,
       teacherId: session.user.teacherProfileId!,
+      images: {
+        create: parsed.data.images.map((img, order) => ({ imageUrl: img.imageUrl, order })),
+      },
+      attachments: {
+        create: parsed.data.attachments,
+      },
     },
   });
 

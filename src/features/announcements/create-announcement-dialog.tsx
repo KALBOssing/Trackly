@@ -6,13 +6,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Trash2 } from "lucide-react";
 import { announcementSchema } from "@/lib/validations/academic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { FileDropzone, type UploadedFile } from "@/features/uploads/file-dropzone";
 import { z } from "zod";
 
 type AnnouncementInput = z.infer<typeof announcementSchema>;
@@ -21,6 +22,8 @@ export function CreateAnnouncementDialog({ classes }: { classes: { id: string; n
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pendingImages, setPendingImages] = useState<UploadedFile[]>([]);
+  const [pendingAttachments, setPendingAttachments] = useState<UploadedFile[]>([]);
   const {
     register,
     handleSubmit,
@@ -39,7 +42,16 @@ export function CreateAnnouncementDialog({ classes }: { classes: { id: string; n
       const res = await fetch("/api/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          images: pendingImages.map((f) => ({ imageUrl: f.url })),
+          attachments: pendingAttachments.map((f) => ({
+            fileName: f.fileName,
+            fileUrl: f.url,
+            fileType: f.fileType,
+            fileSizeBytes: f.fileSizeBytes,
+          })),
+        }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -48,6 +60,8 @@ export function CreateAnnouncementDialog({ classes }: { classes: { id: string; n
       }
       toast.success(data.scheduledAt ? "Announcement scheduled" : "Announcement posted");
       reset();
+      setPendingImages([]);
+      setPendingAttachments([]);
       setOpen(false);
       router.refresh();
     } finally {
@@ -126,9 +140,46 @@ export function CreateAnnouncementDialog({ classes }: { classes: { id: string; n
               Pin to top
             </label>
 
-            <p className="text-xs text-muted-foreground">
-              You can add images or file attachments after posting, from the Edit menu on the announcement.
-            </p>
+            <div className="space-y-1.5">
+              <Label>Images (optional)</Label>
+              {pendingImages.length > 0 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {pendingImages.map((img, i) => (
+                    <div key={img.url} className="group relative aspect-square overflow-hidden rounded-md border border-border">
+                      <img src={img.url} alt="" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setPendingImages((prev) => prev.filter((_, idx) => idx !== i))}
+                        className="absolute right-1 top-1 rounded bg-black/50 p-1 text-white opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <FileDropzone onUploaded={(f) => setPendingImages((prev) => [...prev, f])} />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Attachments (optional)</Label>
+              {pendingAttachments.length > 0 && (
+                <div className="space-y-1">
+                  {pendingAttachments.map((f, i) => (
+                    <div key={f.url} className="flex items-center gap-2 rounded-md border border-border p-2 text-sm">
+                      <span className="flex-1 truncate">{f.fileName}</span>
+                      <button
+                        type="button"
+                        onClick={() => setPendingAttachments((prev) => prev.filter((_, idx) => idx !== i))}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <FileDropzone onUploaded={(f) => setPendingAttachments((prev) => [...prev, f])} />
+            </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>

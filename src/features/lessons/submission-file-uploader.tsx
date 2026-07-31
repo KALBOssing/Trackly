@@ -11,7 +11,12 @@ export function SubmissionFileUploader({ lessonPathwayId }: { lessonPathwayId: s
     const res = await fetch(`/api/lesson-pathways/${lessonPathwayId}/submission-files`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(file),
+      body: JSON.stringify({
+        fileName: file.fileName,
+        fileUrl: file.url,
+        fileType: file.fileType,
+        fileSizeBytes: file.fileSizeBytes,
+      }),
     });
     if (!res.ok) {
       toast.error("Uploaded, but failed to attach to your submission");

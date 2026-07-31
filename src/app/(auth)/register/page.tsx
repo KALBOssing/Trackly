@@ -10,6 +10,7 @@ import { GraduationCap, Loader2 } from "lucide-react";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,7 @@ export default function RegisterPage() {
 
   function selectRole(next: "STUDENT" | "TEACHER") {
     setRole(next);
-    setValue("role", next);
+    setValue("role", next, { shouldValidate: true });
   }
 
   async function onSubmit(data: RegisterInput) {
@@ -81,6 +82,8 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <input type="hidden" {...register("role")} />
+
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="firstName">First Name</Label>
@@ -120,14 +123,14 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" {...register("password")} />
+                <PasswordInput id="password" {...register("password")} />
                 {errors.password && (
                   <p className="text-xs text-destructive">{errors.password.message}</p>
                 )}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input id="confirmPassword" type="password" {...register("confirmPassword")} />
+                <PasswordInput id="confirmPassword" {...register("confirmPassword")} />
                 {errors.confirmPassword && (
                   <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
                 )}

@@ -26,12 +26,16 @@ export default async function SettingsPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Coming soon</CardTitle>
+            <CardTitle>Delete Account</CardTitle>
             <CardDescription>
-              School-wide settings (grading scales, term dates, integrations) will land in a later
-              phase — teachers can&apos;t modify system settings or other teacher accounts by design.
+              Manage or permanently delete your account from your Profile page.
             </CardDescription>
           </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline">
+              <Link href="/profile">Go to Profile</Link>
+            </Button>
+          </CardContent>
         </Card>
       </div>
     </>

@@ -48,19 +48,28 @@ export default async function LessonsPage({
           },
         };
 
-  const [lessons, total] = await Promise.all([
-    prisma.lesson.findMany({
-      where,
-      include: {
-        pathways: { include: { pathway: true } },
-        _count: user.role === "TEACHER" ? { select: { pathways: true } } : undefined,
-      },
-      orderBy: user.role === "TEACHER" ? { updatedAt: "desc" } : { dueDate: "asc" },
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-    }),
-    prisma.lesson.count({ where }),
-  ]);
+  const [lessons, total] =
+    user.role === "TEACHER"
+      ? await Promise.all([
+          prisma.lesson.findMany({
+            where,
+            include: { pathways: { include: { pathway: true } } },
+            orderBy: { updatedAt: "desc" },
+            skip: (page - 1) * PAGE_SIZE,
+            take: PAGE_SIZE,
+          }),
+          prisma.lesson.count({ where }),
+        ])
+      : await Promise.all([
+          prisma.lesson.findMany({
+            where,
+            include: { pathways: { include: { pathway: true } } },
+            orderBy: { dueDate: "asc" },
+            skip: (page - 1) * PAGE_SIZE,
+            take: PAGE_SIZE,
+          }),
+          prisma.lesson.count({ where }),
+        ]);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const filters = user.role === "TEACHER" ? TEACHER_FILTERS : STUDENT_FILTERS;
 

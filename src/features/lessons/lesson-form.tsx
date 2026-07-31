@@ -14,6 +14,8 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { SUBJECTS } from "@/lib/constants/subjects";
+import { FileDropzone, type UploadedFile } from "@/features/uploads/file-dropzone";
 
 type Option = { id: string; name: string };
 type StudentOption = { id: string; name: string; classId: string };
@@ -69,6 +71,7 @@ export function LessonForm({
   const [loading, setLoading] = useState(false);
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [pendingResources, setPendingResources] = useState<UploadedFile[]>([]);
 
   const {
     register,
@@ -135,6 +138,12 @@ export function LessonForm({
       classIds: selectedClassIds,
       studentIds: selectedStudentIds,
       status,
+      resources: pendingResources.map((f) => ({
+        fileName: f.fileName,
+        fileUrl: f.url,
+        fileType: f.fileType,
+        fileSizeBytes: f.fileSizeBytes,
+      })),
     });
     if (!parsed.success) {
       toast.error(parsed.error.errors[0]?.message ?? "Please check the form for errors");
@@ -182,8 +191,20 @@ export function LessonForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="subject">Subject (optional)</Label>
-              <Input id="subject" {...register("subject")} />
+              <Label htmlFor="subject">Subject</Label>
+              <Select onValueChange={(v) => setValue("subject", v)} value={watch("subject")}>
+                <SelectTrigger id="subject">
+                  <SelectValue placeholder="Select a subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUBJECTS.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.subject && <p className="text-xs text-destructive">{errors.subject.message}</p>}
             </div>
             <div />
           </div>
@@ -267,8 +288,28 @@ export function LessonForm({
         <Card>
           <CardHeader>
             <CardTitle>Resources</CardTitle>
-            <CardDescription>You can upload lesson materials after creating the lesson.</CardDescription>
+            <CardDescription>Upload any learning materials students should see with this lesson.</CardDescription>
           </CardHeader>
+          <CardContent className="space-y-3">
+            {pendingResources.length > 0 && (
+              <div className="space-y-1.5">
+                {pendingResources.map((f, i) => (
+                  <div key={f.url} className="flex items-center gap-2 rounded-md border border-border p-2 text-sm">
+                    <span className="flex-1 truncate">{f.fileName}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setPendingResources((prev) => prev.filter((_, idx) => idx !== i))}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <FileDropzone onUploaded={(f) => setPendingResources((prev) => [...prev, f])} />
+          </CardContent>
         </Card>
       )}
 

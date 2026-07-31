@@ -11,7 +11,12 @@ export function LessonResourcesUploader({ lessonId }: { lessonId: string }) {
     const res = await fetch(`/api/lessons/${lessonId}/resources`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(file),
+      body: JSON.stringify({
+        fileName: file.fileName,
+        fileUrl: file.url,
+        fileType: file.fileType,
+        fileSizeBytes: file.fileSizeBytes,
+      }),
     });
     if (!res.ok) {
       toast.error("Uploaded, but failed to attach to the lesson");

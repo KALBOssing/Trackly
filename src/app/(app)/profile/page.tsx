@@ -4,6 +4,7 @@ import { Topbar } from "@/components/layout/topbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "@/features/profile/profile-form";
 import { ProfilePictureUploader } from "@/features/profile/profile-picture-uploader";
+import { DeleteAccountDialog } from "@/features/profile/delete-account-dialog";
 import { Trophy } from "lucide-react";
 
 export default async function ProfilePage() {
@@ -89,6 +90,14 @@ export default async function ProfilePage() {
                 notificationsOptIn: dbUser.notificationsOptIn,
               }}
             />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DeleteAccountDialog />
           </CardContent>
         </Card>
       </div>

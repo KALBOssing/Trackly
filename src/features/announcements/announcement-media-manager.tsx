@@ -35,7 +35,12 @@ export function AnnouncementMediaManager({
     const res = await fetch(`/api/announcements/${announcementId}/attachments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(file),
+      body: JSON.stringify({
+        fileName: file.fileName,
+        fileUrl: file.url,
+        fileType: file.fileType,
+        fileSizeBytes: file.fileSizeBytes,
+      }),
     });
     if (!res.ok) {
       toast.error("Failed to attach file");
