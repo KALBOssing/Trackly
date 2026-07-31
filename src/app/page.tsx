@@ -203,30 +203,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="bg-secondary/40 py-20">
-        <div className="container">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold">Trusted by teachers</h2>
-          </div>
-          <div className="mt-14 grid gap-6 sm:grid-cols-3">
-            {[
-              { name: "M. Santos", role: "Grade 11 Adviser", quote: "Grading and tracking pathway completion finally live in one place." },
-              { name: "R. Cruz", role: "STEM Coordinator", quote: "Students actually check their progress now instead of asking me." },
-              { name: "A. Reyes", role: "Homeroom Teacher", quote: "The analytics export saves me hours every grading period." },
-            ].map((t) => (
-              <Card key={t.name}>
-                <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground">&quot;{t.quote}&quot;</p>
-                  <p className="mt-4 text-sm font-medium">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* FAQ */}
       <section id="faq" className="container py-20">
         <div className="mx-auto max-w-2xl text-center">

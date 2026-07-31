@@ -41,6 +41,9 @@ enum NotificationType {
   SUBMISSION_RECEIVED
   LATE_SUBMISSION
   STUDENT_COMMENT
+  CLASS_JOIN_REQUESTED
+  CLASS_JOIN_APPROVED
+  CLASS_JOIN_DENIED
 }
 
 // Lesson lifecycle. Draft -> (Scheduled ->) Published -> Closed -> Archived.
@@ -112,8 +115,8 @@ model StudentProfile {
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   studentId   String   @unique
-  gradeLevel  String
-  section     String
+  gradeLevel  String?
+  section     String?
   classId     String?
   class       Class?   @relation(fields: [classId], references: [id])
 
@@ -123,6 +126,7 @@ model StudentProfile {
   achievements     StudentAchievement[]
   submissionComments SubmissionComment[]
   lessonAssignments  LessonAssignment[]
+  classJoinRequests  ClassJoinRequest[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -165,6 +169,7 @@ model Class {
   enrollments       Enrollment[]
   lessonAssignments LessonAssignment[]
   announcements     Announcement[]
+  joinRequests      ClassJoinRequest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -183,6 +188,31 @@ model Enrollment {
 
   @@index([classId])
   @@map("enrollments")
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+// A student's request to join a class — replaces self-declared grade/section
+// at registration. Students apply, teachers admit (or deny) them into the
+// class, and only on approval does StudentProfile.classId get set.
+model ClassJoinRequest {
+  id        String            @id @default(cuid())
+  studentId String
+  student   StudentProfile    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classId   String
+  class     Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+  status    JoinRequestStatus @default(PENDING)
+  message   String?           @db.Text
+  requestedAt DateTime        @default(now())
+  respondedAt DateTime?
+
+  @@unique([studentId, classId])
+  @@index([classId, status])
+  @@map("class_join_requests")
 }
 
 // ------------------------------------------------------------

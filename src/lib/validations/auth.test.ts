@@ -10,7 +10,7 @@ const base = {
 };
 
 describe("registerSchema", () => {
-  it("requires studentId/gradeLevel/section when role is STUDENT", () => {
+  it("requires studentId when role is STUDENT", () => {
     const result = registerSchema.safeParse({ ...base, role: "STUDENT" });
     expect(result.success).toBe(false);
   });
@@ -20,8 +20,6 @@ describe("registerSchema", () => {
       ...base,
       role: "STUDENT",
       studentId: "S00001",
-      gradeLevel: "Grade 11",
-      section: "STEM A",
     });
     expect(result.success).toBe(true);
   });

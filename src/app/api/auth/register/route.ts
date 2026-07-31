@@ -59,8 +59,6 @@ export async function POST(req: Request) {
             studentProfile: {
               create: {
                 studentId: data.studentId!,
-                gradeLevel: data.gradeLevel!,
-                section: data.section!,
               },
             },
           }

@@ -88,7 +88,7 @@ export default function RegisterPage() {
                 {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="middleName">Middle Name</Label>
+                <Label htmlFor="middleName">Middle Name (Optional)</Label>
                 <Input id="middleName" {...register("middleName")} />
               </div>
               <div className="space-y-1.5">
@@ -105,22 +105,15 @@ export default function RegisterPage() {
             </div>
 
             {role === "STUDENT" && (
-              <div className="grid grid-cols-3 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="studentId">Student ID</Label>
-                  <Input id="studentId" {...register("studentId")} />
-                  {errors.studentId && (
-                    <p className="text-xs text-destructive">{errors.studentId.message}</p>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="gradeLevel">Grade Level</Label>
-                  <Input id="gradeLevel" placeholder="Grade 11" {...register("gradeLevel")} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="section">Section</Label>
-                  <Input id="section" placeholder="STEM A" {...register("section")} />
-                </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="studentId">Student ID</Label>
+                <Input id="studentId" {...register("studentId")} />
+                {errors.studentId && (
+                  <p className="text-xs text-destructive">{errors.studentId.message}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  You&apos;ll be able to request to join your class once you&apos;re signed in.
+                </p>
               </div>
             )}
 

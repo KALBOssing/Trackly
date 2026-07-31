@@ -47,7 +47,7 @@ export function Sidebar({ role }: { role: "STUDENT" | "TEACHER" }) {
 
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card px-4 py-6 md:flex">
-      <Link href="/" className="mb-8 flex items-center gap-2 px-2 font-semibold text-lg">
+      <Link href="/dashboard" className="mb-8 flex items-center gap-2 px-2 font-semibold text-lg">
         <GraduationCap className="h-6 w-6 text-primary" /> Trackly
       </Link>
       <nav className="flex-1 space-y-1">

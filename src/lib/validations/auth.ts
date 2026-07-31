@@ -8,8 +8,6 @@ export const registerSchema = z
     lastName: z.string().min(1, "Last name is required").max(60),
     email: z.string().email("Enter a valid email address"),
     studentId: z.string().min(1).max(30).optional(),
-    gradeLevel: z.string().max(20).optional(),
-    section: z.string().max(20).optional(),
     password: z.string().regex(PASSWORD_REGEX, passwordStrengthMessage()),
     confirmPassword: z.string(),
     role: z.enum(["STUDENT", "TEACHER"]),
@@ -18,15 +16,10 @@ export const registerSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   })
-  .refine(
-    (data) =>
-      data.role !== "STUDENT" ||
-      (data.studentId && data.gradeLevel && data.section),
-    {
-      message: "Student ID, grade level, and section are required for students",
-      path: ["studentId"],
-    }
-  );
+  .refine((data) => data.role !== "STUDENT" || !!data.studentId, {
+    message: "Student ID is required for students",
+    path: ["studentId"],
+  });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 

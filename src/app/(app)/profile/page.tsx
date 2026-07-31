@@ -10,7 +10,7 @@ export default async function ProfilePage() {
   const user = await requireUser();
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-    include: { studentProfile: true, teacherProfile: true },
+    include: { studentProfile: { include: { class: true } }, teacherProfile: true },
   });
   if (!dbUser) return null;
 
@@ -40,7 +40,11 @@ export default async function ProfilePage() {
               <p className="text-sm text-muted-foreground">{dbUser.email}</p>
               <p className="text-xs text-muted-foreground">
                 {dbUser.role === "STUDENT"
-                  ? `Student ID: ${dbUser.studentProfile?.studentId} · ${dbUser.studentProfile?.gradeLevel} ${dbUser.studentProfile?.section}`
+                  ? `Student ID: ${dbUser.studentProfile?.studentId}${
+                      dbUser.studentProfile?.class
+                        ? ` · ${dbUser.studentProfile.class.name}`
+                        : " · Not enrolled in a class yet"
+                    }`
                   : "Teacher"}
               </p>
             </div>
