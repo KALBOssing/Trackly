@@ -163,7 +163,7 @@ model Class {
   section     String
   status      ClassStatus @default(ACTIVE)
   teacherId   String
-  teacher     TeacherProfile @relation(fields: [teacherId], references: [id])
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   students          StudentProfile[]
   enrollments       Enrollment[]
@@ -267,7 +267,7 @@ model Lesson {
   objectives  String?      @db.Text
   subject     String   @default("General")
   teacherId   String
-  teacher     TeacherProfile @relation(fields: [teacherId], references: [id])
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   status            LessonStatus @default(DRAFT)
   availableAt       DateTime?    // when students may start viewing/working
@@ -417,7 +417,7 @@ model Grade {
   feedback       String?    @db.Text
   feedbackFileUrl String?
   gradedById     String
-  gradedBy       TeacherProfile @relation(fields: [gradedById], references: [id])
+  gradedBy       TeacherProfile @relation(fields: [gradedById], references: [id], onDelete: Cascade)
   released       Boolean    @default(false)
   gradedAt       DateTime   @default(now())
 
@@ -436,7 +436,7 @@ model Announcement {
   class       Class?    @relation(fields: [classId], references: [id])
   studentId   String?   // individual-student targeting (optional, in addition to classId)
   teacherId   String
-  teacher     TeacherProfile @relation(fields: [teacherId], references: [id])
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   pinned      Boolean   @default(false)
   priority    AnnouncementPriority @default(NORMAL)
   status      AnnouncementStatus   @default(DRAFT)

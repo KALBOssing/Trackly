@@ -97,7 +97,7 @@ export default async function ProfilePage() {
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
           </CardHeader>
           <CardContent>
-            <DeleteAccountDialog />
+            <DeleteAccountDialog role={user.role} />
           </CardContent>
         </Card>
       </div>

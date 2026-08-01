@@ -63,7 +63,7 @@ const faqs = [
   },
   {
     q: "Can I export reports?",
-    a: "Yes — analytics can be exported to CSV, Excel, or PDF from the Analytics dashboard.",
+    a: "Yes, analytics can be exported to CSV, Excel, or PDF from the Analytics dashboard.",
   },
 ];
 
@@ -97,14 +97,14 @@ export default function LandingPage() {
       <section className="container py-24 text-center">
         <div className="mx-auto max-w-3xl">
           <span className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
-            <Sparkles className="h-3.5 w-3.5" /> Built for GLOW Pathways schools
+            <Sparkles className="h-3.5 w-3.5" /> Built for the GLOW Pathways
           </span>
           <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-6xl">
             Progress tracking that feels effortless.
           </h1>
           <p className="mt-6 text-lg text-muted-foreground">
             Trackly helps teachers manage classes and lessons while students see their GLOW
-            Pathways progress in real time — clean, modern, and built for daily use.
+            Pathways progress in real time. Clean, modern, and built for daily use.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
             <Button size="lg" asChild>
@@ -122,7 +122,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold">Everything a GLOW classroom needs</h2>
           <p className="mt-3 text-muted-foreground">
-            One place for lessons, grading, pathways, and progress — no spreadsheets required.
+            One place for lessons, grading, pathways, and progress. No spreadsheets required.
           </p>
         </div>
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

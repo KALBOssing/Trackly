@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function DeleteAccountDialog() {
+export function DeleteAccountDialog({ role }: { role: "STUDENT" | "TEACHER" }) {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -52,7 +52,10 @@ export function DeleteAccountDialog() {
           <Dialog.Title className="text-lg font-semibold text-destructive">Delete your account?</Dialog.Title>
           <Dialog.Description className="mt-2 text-sm text-muted-foreground">
             This permanently deletes your account, profile, submissions, grades, and everything
-            attached to it. This can&apos;t be undone. Enter your password to confirm.
+            attached to it.
+            {role === "TEACHER" &&
+              " This includes every class, lesson, and announcement you've created — your students will lose access to all of it."}{" "}
+            This can&apos;t be undone. Enter your password to confirm.
           </Dialog.Description>
 
           <div className="mt-4 space-y-1.5">

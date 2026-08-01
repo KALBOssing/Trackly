@@ -20,18 +20,6 @@ export async function DELETE(req: Request) {
   const valid = await verifyPassword(parsed.data.password, user.passwordHash);
   if (!valid) return NextResponse.json({ error: "Incorrect password" }, { status: 401 });
 
-  if (session.user.role === "TEACHER") {
-    const classCount = await prisma.class.count({ where: { teacherId: session.user.teacherProfileId } });
-    if (classCount > 0) {
-      return NextResponse.json(
-        {
-          error: `You still have ${classCount} class${classCount === 1 ? "" : "es"} with student data attached. Delete or hand off your classes before deleting your account, so your students aren't left without a teacher.`,
-        },
-        { status: 409 }
-      );
-    }
-  }
-
   await prisma.user.delete({ where: { id: user.id } });
 
   return NextResponse.json({ success: true });

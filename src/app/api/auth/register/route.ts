@@ -45,29 +45,44 @@ export async function POST(req: Request) {
   const passwordHash = await hashPassword(data.password);
   const emailVerifyToken = crypto.randomBytes(32).toString("hex");
 
-  const user = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      role: data.role,
-      firstName: data.firstName,
-      middleName: data.middleName || null,
-      lastName: data.lastName,
-      emailVerifyToken,
-      ...(data.role === "STUDENT"
-        ? {
-            studentProfile: {
-              create: {
-                studentId: data.studentId!,
+  let user;
+  try {
+    user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        role: data.role,
+        firstName: data.firstName,
+        middleName: data.middleName || null,
+        lastName: data.lastName,
+        emailVerifyToken,
+        ...(data.role === "STUDENT"
+          ? {
+              studentProfile: {
+                create: {
+                  studentId: data.studentId!,
+                },
               },
-            },
-          }
-        : {
-            teacherProfile: { create: {} },
-          }),
-    },
-    select: { id: true, email: true, role: true },
-  });
+            }
+          : {
+              teacherProfile: { create: {} },
+            }),
+      },
+      select: { id: true, email: true, role: true },
+    });
+  } catch (err: any) {
+    // Backstop for a race condition between the pre-checks above and this
+    // insert (e.g. two people registering the same email/student ID at
+    // once) — Prisma's P2002 is a unique-constraint violation.
+    if (err?.code === "P2002") {
+      const target = String(err?.meta?.target ?? "");
+      const message = target.includes("studentId")
+        ? "Student ID is already in use"
+        : "Email is already registered";
+      return NextResponse.json({ error: message }, { status: 409 });
+    }
+    throw err;
+  }
 
   await prisma.activityLog.create({
     data: { userId: user.id, action: "USER_REGISTERED", ipAddress: ip },

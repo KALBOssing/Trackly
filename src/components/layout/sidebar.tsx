@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 const studentLinks = [
   { href: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/classes", label: "Classes", icon: Users },
   { href: "/lessons", label: "Lessons", icon: BookOpenCheck },
   { href: "/announcements", label: "Announcements", icon: Megaphone },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
