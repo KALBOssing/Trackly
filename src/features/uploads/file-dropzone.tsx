@@ -83,7 +83,7 @@ export function FileDropzone({
         )}
         <p className="text-sm font-medium">Drag & drop files, or click to browse</p>
         <p className="text-xs text-muted-foreground">
-          PDF, DOC, PPT, XLS, ZIP, PNG, JPG, MP4 — up to 100MB each
+          PDF, DOC, PPT, XLS, ZIP, PNG, JPG, MP4 (up to 100MB each)
         </p>
       </label>
 

@@ -11,7 +11,7 @@ export default async function ProfilePage() {
   const user = await requireUser();
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-    include: { studentProfile: { include: { class: true } }, teacherProfile: true },
+    include: { studentProfile: { include: { enrollments: { include: { class: true } } } }, teacherProfile: true },
   });
   if (!dbUser) return null;
 
@@ -42,8 +42,10 @@ export default async function ProfilePage() {
               <p className="text-xs text-muted-foreground">
                 {dbUser.role === "STUDENT"
                   ? `Student ID: ${dbUser.studentProfile?.studentId}${
-                      dbUser.studentProfile?.class
-                        ? ` · ${dbUser.studentProfile.class.name}`
+                      dbUser.studentProfile?.enrollments.length
+                        ? ` · Enrolled in ${dbUser.studentProfile.enrollments.length} class${
+                            dbUser.studentProfile.enrollments.length === 1 ? "" : "es"
+                          }`
                         : " · Not enrolled in a class yet"
                     }`
                   : "Teacher"}
@@ -68,7 +70,7 @@ export default async function ProfilePage() {
               ))}
               {achievements.length === 0 && (
                 <p className="col-span-full text-sm text-muted-foreground">
-                  No badges yet — complete and get graded on lessons to earn your first one.
+                  No badges yet. Complete and get graded on lessons to earn your first one.
                 </p>
               )}
             </CardContent>

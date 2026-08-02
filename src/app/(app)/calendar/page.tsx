@@ -35,7 +35,7 @@ export default async function CalendarPage() {
             assignments: {
               some: {
                 OR: [
-                  { class: { students: { some: { id: user.studentProfileId } } } },
+                  { class: { enrollments: { some: { studentId: user.studentProfileId } } } },
                   { studentId: user.studentProfileId },
                 ],
               },
@@ -49,7 +49,7 @@ export default async function CalendarPage() {
       createdAt: { gte: gridStart, lte: gridEnd },
       ...(user.role === "TEACHER"
         ? { teacherId: user.teacherProfileId }
-        : { OR: [{ classId: null }, { class: { students: { some: { id: user.studentProfileId } } } }] }),
+        : { OR: [{ classId: null }, { class: { enrollments: { some: { studentId: user.studentProfileId } } } }] }),
     },
   });
 

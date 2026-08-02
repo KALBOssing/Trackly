@@ -45,7 +45,7 @@ export function JoinClassSection({
         toast.error(json.error ?? "Failed to send request");
         return;
       }
-      toast.success("Request sent — your teacher will review it soon.");
+      toast.success("Request sent. Your teacher will review it soon.");
       router.refresh();
     } finally {
       setLoadingId(null);
@@ -57,7 +57,7 @@ export function JoinClassSection({
       <CardHeader>
         <CardTitle>Join a Class</CardTitle>
         <CardDescription>
-          Request to join a class — your teacher will need to admit you before you can see its lessons.
+          Request to join a class. Your teacher will need to admit you before you can see its lessons.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">

@@ -27,14 +27,14 @@ export async function GET(req: Request) {
       }),
       prisma.studentProfile.findMany({
         where: {
-          class: { teacherId: teacherProfileId },
+          enrollments: { some: { class: { teacherId: teacherProfileId } } },
           OR: [
             { user: { firstName: { contains: q, mode: "insensitive" } } },
             { user: { lastName: { contains: q, mode: "insensitive" } } },
             { studentId: { contains: q, mode: "insensitive" } },
           ],
         },
-        include: { user: true, class: true },
+        include: { user: true, enrollments: { where: { class: { teacherId: teacherProfileId } }, include: { class: true }, take: 1 } },
         take: 5,
       }),
       prisma.announcement.findMany({
@@ -57,7 +57,7 @@ export async function GET(req: Request) {
         id: s.id,
         title: `${s.user.firstName} ${s.user.lastName}`,
         subtitle: s.studentId,
-        href: `/classes/${s.classId}`,
+        href: s.enrollments[0] ? `/classes/${s.enrollments[0].classId}` : "/classes",
       })),
       ...announcements.map((a) => ({ type: "Announcement", id: a.id, title: a.title, href: `/announcements` }))
     );
@@ -70,7 +70,7 @@ export async function GET(req: Request) {
           status: "PUBLISHED",
           assignments: {
             some: {
-              OR: [{ class: { students: { some: { id: studentProfileId } } } }, { studentId: studentProfileId }],
+              OR: [{ class: { enrollments: { some: { studentId: studentProfileId } } } }, { studentId: studentProfileId }],
             },
           },
           title: { contains: q, mode: "insensitive" },
@@ -80,7 +80,7 @@ export async function GET(req: Request) {
       prisma.announcement.findMany({
         where: {
           title: { contains: q, mode: "insensitive" },
-          OR: [{ classId: null }, { class: { students: { some: { id: studentProfileId } } } }],
+          OR: [{ classId: null }, { class: { enrollments: { some: { studentId: studentProfileId } } } }],
         },
         take: 5,
       }),

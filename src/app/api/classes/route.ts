@@ -11,18 +11,18 @@ export async function GET() {
   if (session.user.role === "TEACHER") {
     const classes = await prisma.class.findMany({
       where: { teacherId: session.user.teacherProfileId },
-      include: { _count: { select: { students: true, lessonAssignments: true } } },
+      include: { _count: { select: { enrollments: true, lessonAssignments: true } } },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json({ classes });
   }
 
-  // Students see only their own class.
-  const profile = await prisma.studentProfile.findUnique({
-    where: { id: session.user.studentProfileId },
+  // Students may be enrolled in several classes.
+  const enrollments = await prisma.enrollment.findMany({
+    where: { studentId: session.user.studentProfileId },
     include: { class: true },
   });
-  return NextResponse.json({ classes: profile?.class ? [profile.class] : [] });
+  return NextResponse.json({ classes: enrollments.map((e) => e.class) });
 }
 
 export async function POST(req: Request) {

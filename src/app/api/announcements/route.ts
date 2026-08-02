@@ -25,7 +25,7 @@ export async function GET() {
         {
           OR: [
             { classId: null },
-            { class: { students: { some: { id: session.user.studentProfileId } } } },
+            { class: { enrollments: { some: { studentId: session.user.studentProfileId } } } },
             { studentId: session.user.studentProfileId },
           ],
         },
@@ -84,10 +84,10 @@ export async function POST(req: Request) {
   if (status === "PUBLISHED") {
     const recipients = await prisma.studentProfile.findMany({
       where: parsed.data.classId
-        ? { classId: parsed.data.classId }
+        ? { enrollments: { some: { classId: parsed.data.classId } } }
         : parsed.data.studentId
           ? { id: parsed.data.studentId }
-          : { class: { teacherId: session.user.teacherProfileId } },
+          : { enrollments: { some: { class: { teacherId: session.user.teacherProfileId } } } },
       include: { user: true },
     });
     await prisma.notification.createMany({

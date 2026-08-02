@@ -18,7 +18,7 @@ import { SUBJECTS } from "@/lib/constants/subjects";
 import { FileDropzone, type UploadedFile } from "@/features/uploads/file-dropzone";
 
 type Option = { id: string; name: string };
-type StudentOption = { id: string; name: string; classId: string };
+type StudentOption = { id: string; name: string; classIds: string[] };
 
 type ExistingLesson = {
   id: string;
@@ -172,7 +172,7 @@ export function LessonForm({
   }
 
   const availableStudents = selectedClassIds.length
-    ? students.filter((s) => selectedClassIds.includes(s.classId))
+    ? students.filter((s) => s.classIds.some((id) => selectedClassIds.includes(id)))
     : students;
 
   return (

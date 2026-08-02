@@ -10,7 +10,6 @@ import {
   GraduationCap,
   LayoutDashboard,
   Megaphone,
-  Settings,
   Users,
   LogOut,
   Bell,
@@ -39,7 +38,6 @@ const teacherLinks = [
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/audit-log", label: "Audit Log", icon: ScrollText },
   { href: "/profile", label: "Profile", icon: UserCircle },
-  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar({ role }: { role: "STUDENT" | "TEACHER" }) {

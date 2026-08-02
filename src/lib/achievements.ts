@@ -21,14 +21,16 @@ export async function recomputeProgressAndAchievements(
   pathwayId: string,
   justGraded: { score: number; maxScore: number }
 ) {
-  const student = await prisma.studentProfile.findUnique({ where: { id: studentId } });
-  if (!student?.classId) return;
+  const classIds = (await prisma.enrollment.findMany({ where: { studentId }, select: { classId: true } })).map(
+    (e) => e.classId
+  );
+  if (classIds.length === 0) return;
 
   const [total, completed, gradedSubmissionsCount] = await Promise.all([
     prisma.lessonPathway.count({
       where: {
         pathwayId,
-        lesson: { status: "PUBLISHED", assignments: { some: { classId: student.classId } } },
+        lesson: { status: "PUBLISHED", assignments: { some: { classId: { in: classIds } } } },
       },
     }),
     prisma.submission.count({

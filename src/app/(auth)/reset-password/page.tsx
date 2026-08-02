@@ -41,7 +41,7 @@ function ResetPasswordForm() {
         toast.error(json.error ?? "Failed to reset password");
         return;
       }
-      toast.success("Password updated — you can now sign in.");
+      toast.success("Password updated. You can now sign in.");
       router.push("/login");
     } finally {
       setLoading(false);

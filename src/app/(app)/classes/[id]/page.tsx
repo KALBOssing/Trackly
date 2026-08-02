@@ -7,6 +7,7 @@ import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BulkImportButton } from "@/features/classes/bulk-import-button";
 import { ClassActionsMenu } from "@/features/classes/class-actions-menu";
+import { RemoveStudentButton } from "@/features/classes/remove-student-button";
 import { initials, formatDate } from "@/lib/utils";
 
 export default async function ClassDetailPage({ params }: { params: { id: string } }) {
@@ -15,7 +16,7 @@ export default async function ClassDetailPage({ params }: { params: { id: string
   const cls = await prisma.class.findUnique({
     where: { id: params.id },
     include: {
-      students: { include: { user: true }, orderBy: { studentId: "asc" } },
+      enrollments: { include: { student: { include: { user: true } } }, orderBy: { student: { studentId: "asc" } } },
       teacher: { include: { user: true } },
     },
   });
@@ -23,8 +24,10 @@ export default async function ClassDetailPage({ params }: { params: { id: string
   if (!cls) notFound();
 
   const isOwner = user.role === "TEACHER" && cls.teacherId === user.teacherProfileId;
-  const isEnrolled = user.role === "STUDENT" && cls.students.some((s) => s.id === user.studentProfileId);
+  const isEnrolled = user.role === "STUDENT" && cls.enrollments.some((e) => e.studentId === user.studentProfileId);
   if (!isOwner && !isEnrolled) notFound();
+
+  const roster = cls.enrollments.map((e) => e.student);
 
   const lessons = await prisma.lesson.findMany({
     where: { assignments: { some: { classId: cls.id } } },
@@ -58,12 +61,12 @@ export default async function ClassDetailPage({ params }: { params: { id: string
         <div className="grid gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Roster ({cls.students.length})</CardTitle>
+              <CardTitle>Roster ({roster.length})</CardTitle>
               {isOwner && <BulkImportButton classId={cls.id} />}
             </CardHeader>
             <CardContent>
               <div className="divide-y divide-border">
-                {cls.students.map((s) => (
+                {roster.map((s) => (
                   <div key={s.id} className="flex items-center gap-3 py-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-medium">
                       {initials(s.user.firstName, s.user.lastName)}
@@ -74,9 +77,16 @@ export default async function ClassDetailPage({ params }: { params: { id: string
                       </p>
                       <p className="text-xs text-muted-foreground">{s.studentId}</p>
                     </div>
+                    {isOwner && (
+                      <RemoveStudentButton
+                        classId={cls.id}
+                        studentId={s.id}
+                        studentName={`${s.user.firstName} ${s.user.lastName}`}
+                      />
+                    )}
                   </div>
                 ))}
-                {cls.students.length === 0 && (
+                {roster.length === 0 && (
                   <p className="py-3 text-sm text-muted-foreground">No students enrolled yet.</p>
                 )}
               </div>

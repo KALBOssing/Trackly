@@ -40,7 +40,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
   const existing = await getOwnedClass(params.id, session.user.teacherProfileId!);
   if (!existing) return NextResponse.json({ error: "Class not found" }, { status: 404 });
 
-  const studentCount = await prisma.studentProfile.count({ where: { classId: existing.id } });
+  const studentCount = await prisma.enrollment.count({ where: { classId: existing.id } });
   if (studentCount > 0) {
     return NextResponse.json(
       { error: "This class still has students enrolled. Archive it instead, or remove all students first." },

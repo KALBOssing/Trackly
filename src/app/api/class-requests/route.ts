@@ -36,9 +36,11 @@ export async function POST(req: Request) {
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 400 });
 
-  const student = await prisma.studentProfile.findUnique({ where: { id: session.user.studentProfileId! } });
-  if (student?.classId) {
-    return NextResponse.json({ error: "You're already enrolled in a class" }, { status: 409 });
+  const alreadyEnrolled = await prisma.enrollment.findUnique({
+    where: { studentId_classId: { studentId: session.user.studentProfileId!, classId: parsed.data.classId } },
+  });
+  if (alreadyEnrolled) {
+    return NextResponse.json({ error: "You're already enrolled in this class" }, { status: 409 });
   }
 
   const cls = await prisma.class.findUnique({ where: { id: parsed.data.classId } });

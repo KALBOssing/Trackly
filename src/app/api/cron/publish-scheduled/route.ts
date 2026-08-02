@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     include: {
       assignments: {
         include: {
-          class: { include: { students: { include: { user: true } } } },
+          class: { include: { enrollments: { include: { student: { include: { user: true } } } } } },
           student: { include: { user: true } },
         },
       },
@@ -33,7 +33,7 @@ export async function GET(req: Request) {
     await prisma.lesson.update({ where: { id: lesson.id }, data: { status: "PUBLISHED", publishedAt: now } });
 
     const recipients = [
-      ...lesson.assignments.flatMap((a) => a.class?.students ?? []),
+      ...lesson.assignments.flatMap((a) => a.class?.enrollments.map((e) => e.student) ?? []),
       ...lesson.assignments.flatMap((a) => (a.student ? [a.student] : [])),
     ];
     const seen = new Set<string>();
@@ -70,7 +70,11 @@ export async function GET(req: Request) {
     await prisma.announcement.update({ where: { id: a.id }, data: { status: "PUBLISHED", publishedAt: now } });
 
     const recipients = await prisma.studentProfile.findMany({
-      where: a.classId ? { classId: a.classId } : a.studentId ? { id: a.studentId } : { class: { teacherId: a.teacherId } },
+      where: a.classId
+        ? { enrollments: { some: { classId: a.classId } } }
+        : a.studentId
+          ? { id: a.studentId }
+          : { enrollments: { some: { class: { teacherId: a.teacherId } } } },
       include: { user: true },
     });
     await prisma.notification.createMany({

@@ -20,7 +20,7 @@ export default async function StudentDashboardPage() {
         assignments: {
           some: {
             OR: [
-              { class: { students: { some: { id: studentProfileId } } } },
+              { class: { enrollments: { some: { studentId: studentProfileId } } } },
               { studentId: studentProfileId },
             ],
           },
@@ -38,7 +38,7 @@ export default async function StudentDashboardPage() {
       where: {
         status: "PUBLISHED",
         AND: [
-          { OR: [{ classId: null }, { class: { students: { some: { id: studentProfileId } } } }] },
+          { OR: [{ classId: null }, { class: { enrollments: { some: { studentId: studentProfileId } } } }] },
           { OR: [{ scheduledAt: null }, { scheduledAt: { lte: new Date() } }] },
           { OR: [{ expiresAt: null }, { expiresAt: { gte: new Date() } }] },
         ],
@@ -158,7 +158,7 @@ export default async function StudentDashboardPage() {
                 );
               })}
               {upcomingLessons.length === 0 && (
-                <p className="text-sm text-muted-foreground">Nothing due soon — you&apos;re all caught up.</p>
+                <p className="text-sm text-muted-foreground">Nothing due soon. You&apos;re all caught up.</p>
               )}
             </CardContent>
           </Card>

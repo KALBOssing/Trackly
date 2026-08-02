@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
   const rl = rateLimit(`profile-pic:${session.user.id}`, { limit: 10, windowMs: 60 * 1000 });
   if (!rl.success) {
-    return NextResponse.json({ error: "Too many uploads — please slow down." }, { status: 429 });
+    return NextResponse.json({ error: "Too many uploads. Please slow down." }, { status: 429 });
   }
 
   const formData = await req.formData().catch(() => null);

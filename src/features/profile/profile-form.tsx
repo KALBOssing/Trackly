@@ -101,7 +101,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: ProfileFormValue
             </button>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">Changes preview instantly — click Save to keep them.</p>
+        <p className="text-xs text-muted-foreground">Changes preview instantly. Click Save to keep them.</p>
       </div>
 
       <label className="flex items-center gap-2 text-sm">

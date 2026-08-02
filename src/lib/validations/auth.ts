@@ -7,7 +7,12 @@ export const registerSchema = z
     middleName: z.string().max(60).optional().or(z.literal("")),
     lastName: z.string().min(1, "Last name is required").max(60),
     email: z.string().email("Enter a valid email address"),
-    studentId: z.string().min(1).max(30).optional(),
+    studentId: z
+      .string()
+      .max(30)
+      .regex(/^\d{5,}$/, "Student ID must be at least 5 digits")
+      .optional()
+      .or(z.literal("")),
     password: z.string().regex(PASSWORD_REGEX, passwordStrengthMessage()),
     confirmPassword: z.string(),
     role: z.enum(["STUDENT", "TEACHER"]),

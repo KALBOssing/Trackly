@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     where: {
       lessonId: lessonPathway.lessonId,
       OR: [
-        { class: { students: { some: { id: session.user.studentProfileId } } } },
+        { class: { enrollments: { some: { studentId: session.user.studentProfileId } } } },
         { studentId: session.user.studentProfileId },
       ],
     },

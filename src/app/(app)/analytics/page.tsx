@@ -12,14 +12,14 @@ export default async function AnalyticsPage() {
 
   const [pathways, students, submissions] = await Promise.all([
     prisma.pathway.findMany({
-      include: { progress: { where: { student: { class: { teacherId: teacherProfileId } } } } },
+      include: { progress: { where: { student: { enrollments: { some: { class: { teacherId: teacherProfileId } } } } } } },
       orderBy: { order: "asc" },
     }),
     prisma.studentProfile.findMany({
-      where: { class: { teacherId: teacherProfileId } },
+      where: { enrollments: { some: { class: { teacherId: teacherProfileId } } } },
       include: {
         user: true,
-        class: true,
+        enrollments: { where: { class: { teacherId: teacherProfileId } }, include: { class: true } },
         progress: true,
         submissions: { include: { grade: true } },
       },
@@ -54,7 +54,7 @@ export default async function AnalyticsPage() {
     return {
       "Student ID": s.studentId,
       Name: `${s.user.firstName} ${s.user.lastName}`,
-      Class: s.class?.name ?? "—",
+      Class: s.enrollments.map((e) => e.class.name).join(", ") || "N/A",
       "Avg Completion %": avgCompletion,
       "Avg Score": avgScore,
     };

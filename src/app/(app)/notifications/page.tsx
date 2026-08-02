@@ -37,7 +37,7 @@ export default async function NotificationsPage() {
           </Card>
         ))}
         {notifications.length === 0 && (
-          <p className="text-sm text-muted-foreground">You&apos;re all caught up — no notifications yet.</p>
+          <p className="text-sm text-muted-foreground">You&apos;re all caught up. No notifications yet.</p>
         )}
       </div>
     </>

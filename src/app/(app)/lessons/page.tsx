@@ -41,7 +41,7 @@ export default async function LessonsPage({
           assignments: {
             some: {
               OR: [
-                { class: { students: { some: { id: user.studentProfileId } } } },
+                { class: { enrollments: { some: { studentId: user.studentProfileId } } } },
                 { studentId: user.studentProfileId },
               ],
             },

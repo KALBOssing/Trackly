@@ -96,13 +96,12 @@ async function main() {
             studentId: `S${String(i).padStart(5, "0")}`,
             gradeLevel: targetClass.gradeLevel,
             section: targetClass.section,
-            classId: targetClass.id,
           },
         },
       },
       include: { studentProfile: true },
     });
-    students.push(user.studentProfile!);
+    students.push({ ...user.studentProfile!, classId: targetClass.id });
     await prisma.enrollment.create({
       data: { studentId: user.studentProfile!.id, classId: targetClass.id },
     });

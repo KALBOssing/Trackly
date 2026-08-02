@@ -27,21 +27,18 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   if (!parsed.success) return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 
   if (parsed.data.action === "approve") {
-    const alreadyInClass = await prisma.studentProfile.findUnique({ where: { id: request.studentId } });
-    if (alreadyInClass?.classId) {
-      return NextResponse.json({ error: "This student is already enrolled in a class" }, { status: 409 });
+    const alreadyEnrolled = await prisma.enrollment.findUnique({
+      where: { studentId_classId: { studentId: request.studentId, classId: request.classId } },
+    });
+    if (alreadyEnrolled) {
+      return NextResponse.json({ error: "This student is already enrolled in this class" }, { status: 409 });
     }
 
     await prisma.$transaction([
-      prisma.studentProfile.update({ where: { id: request.studentId }, data: { classId: request.classId } }),
+      prisma.enrollment.create({ data: { studentId: request.studentId, classId: request.classId } }),
       prisma.classJoinRequest.update({
         where: { id: request.id },
         data: { status: "APPROVED", respondedAt: new Date() },
-      }),
-      // Any other pending requests from this student are no longer relevant once admitted.
-      prisma.classJoinRequest.updateMany({
-        where: { studentId: request.studentId, status: "PENDING", id: { not: request.id } },
-        data: { status: "DENIED", respondedAt: new Date() },
       }),
     ]);
 

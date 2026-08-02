@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Trackly — GLOW Pathways Progress Tracking",
+  title: "Trackly: GLOW Pathways Progress Tracking",
   description:
     "A modern learning management and progress tracking system for schools running the GLOW Pathways program.",
 };

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { LeaveClassButton } from "@/features/classes/leave-class-button";
 
 type ClassRow = {
   id: string;
@@ -15,12 +16,20 @@ type ClassRow = {
   gradeLevel: string;
   section: string;
   status: "ACTIVE" | "ARCHIVED";
-  _count: { students: number; lessonAssignments: number };
+  _count: { enrollments: number; lessonAssignments: number };
 };
 
 const PAGE_SIZE = 9;
 
-export function ClassesGrid({ classes, canFilterByStatus }: { classes: ClassRow[]; canFilterByStatus: boolean }) {
+export function ClassesGrid({
+  classes,
+  canFilterByStatus,
+  showLeaveButton = false,
+}: {
+  classes: ClassRow[];
+  canFilterByStatus: boolean;
+  showLeaveButton?: boolean;
+}) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "ARCHIVED">("ACTIVE");
   const [sortBy, setSortBy] = useState<"name" | "students">("name");
@@ -41,7 +50,7 @@ export function ClassesGrid({ classes, canFilterByStatus }: { classes: ClassRow[
       );
     }
     rows = [...rows].sort((a, b) =>
-      sortBy === "name" ? a.name.localeCompare(b.name) : b._count.students - a._count.students
+      sortBy === "name" ? a.name.localeCompare(b.name) : b._count.enrollments - a._count.enrollments
     );
     return rows;
   }, [classes, query, statusFilter, sortBy, canFilterByStatus]);
@@ -95,8 +104,8 @@ export function ClassesGrid({ classes, canFilterByStatus }: { classes: ClassRow[
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {pageRows.map((c) => (
-          <Link key={c.id} href={`/classes/${c.id}`}>
-            <Card className={`h-full transition-shadow hover:shadow-md ${c.status === "ARCHIVED" ? "opacity-60" : ""}`}>
+          <Card key={c.id} className={`h-full transition-shadow hover:shadow-md ${c.status === "ARCHIVED" ? "opacity-60" : ""}`}>
+            <Link href={`/classes/${c.id}`}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   {c.name}
@@ -110,16 +119,19 @@ export function ClassesGrid({ classes, canFilterByStatus }: { classes: ClassRow[
                   {c.gradeLevel} · {c.section}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex items-center gap-6 text-sm text-muted-foreground">
+            </Link>
+            <CardContent className="flex items-center justify-between gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-6">
                 <span className="flex items-center gap-1.5">
-                  <Users className="h-4 w-4" /> {c._count.students} students
+                  <Users className="h-4 w-4" /> {c._count.enrollments} students
                 </span>
                 <span className="flex items-center gap-1.5">
                   <BookOpenCheck className="h-4 w-4" /> {c._count.lessonAssignments} lessons
                 </span>
-              </CardContent>
-            </Card>
-          </Link>
+              </div>
+              {showLeaveButton && <LeaveClassButton classId={c.id} className={c.name} />}
+            </CardContent>
+          </Card>
         ))}
         {filtered.length === 0 && (
           <p className="text-sm text-muted-foreground">No classes match your search.</p>

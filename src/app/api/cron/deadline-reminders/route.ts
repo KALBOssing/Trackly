@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     include: {
       assignments: {
         include: {
-          class: { include: { students: { include: { user: true } } } },
+          class: { include: { enrollments: { include: { student: { include: { user: true } } } } } },
           student: { include: { user: true } },
         },
       },
@@ -49,7 +49,7 @@ export async function GET(req: Request) {
     );
 
     const recipients = [
-      ...lesson.assignments.flatMap((a) => a.class?.students ?? []),
+      ...lesson.assignments.flatMap((a) => a.class?.enrollments.map((e) => e.student) ?? []),
       ...lesson.assignments.flatMap((a) => (a.student ? [a.student] : [])),
     ];
     const seen = new Set<string>();

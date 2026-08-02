@@ -13,7 +13,7 @@ export default async function ClassesPage() {
     const [classes, pendingRequests] = await Promise.all([
       prisma.class.findMany({
         where: { teacherId: user.teacherProfileId },
-        include: { _count: { select: { students: true, lessonAssignments: true } } },
+        include: { _count: { select: { enrollments: true, lessonAssignments: true } } },
         orderBy: { createdAt: "desc" },
       }),
       prisma.classJoinRequest.findMany({
@@ -43,42 +43,46 @@ export default async function ClassesPage() {
     );
   }
 
-  // Student view
-  const studentProfile = await prisma.studentProfile.findUnique({ where: { id: user.studentProfileId! } });
-
-  if (!studentProfile?.classId) {
-    const [availableClasses, myRequests] = await Promise.all([
-      prisma.class.findMany({
-        where: { status: "ACTIVE" },
-        include: { teacher: { include: { user: true } } },
-        orderBy: { name: "asc" },
-      }),
-      prisma.classJoinRequest.findMany({
-        where: { studentId: user.studentProfileId },
-        include: { class: true },
-      }),
-    ]);
-
-    return (
-      <>
-        <Topbar title="Classes" name={user.name ?? ""} />
-        <div className="space-y-6 p-6">
-          <JoinClassSection availableClasses={availableClasses} myRequests={myRequests} />
-        </div>
-      </>
-    );
-  }
-
-  const classes = await prisma.class.findMany({
-    where: { students: { some: { id: user.studentProfileId } } },
-    include: { _count: { select: { students: true, lessonAssignments: true } }, teacher: { include: { user: true } } },
-  });
+  // Student view — a student can be enrolled in several classes at once.
+  const [myEnrollments, availableClasses, myRequests] = await Promise.all([
+    prisma.enrollment.findMany({
+      where: { studentId: user.studentProfileId },
+      include: {
+        class: {
+          include: {
+            _count: { select: { enrollments: true, lessonAssignments: true } },
+            teacher: { include: { user: true } },
+          },
+        },
+      },
+      orderBy: { enrolledAt: "desc" },
+    }),
+    prisma.class.findMany({
+      where: {
+        status: "ACTIVE",
+        enrollments: { none: { studentId: user.studentProfileId } },
+      },
+      include: { teacher: { include: { user: true } } },
+      orderBy: { name: "asc" },
+    }),
+    prisma.classJoinRequest.findMany({
+      where: { studentId: user.studentProfileId },
+      include: { class: true },
+    }),
+  ]);
 
   return (
     <>
       <Topbar title="Classes" name={user.name ?? ""} />
       <div className="space-y-6 p-6">
-        <ClassesGrid classes={classes} canFilterByStatus={false} />
+        {myEnrollments.length > 0 && (
+          <ClassesGrid
+            classes={myEnrollments.map((e) => e.class)}
+            canFilterByStatus={false}
+            showLeaveButton
+          />
+        )}
+        <JoinClassSection availableClasses={availableClasses} myRequests={myRequests} />
       </div>
     </>
   );

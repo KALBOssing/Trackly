@@ -62,7 +62,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             studentId: row.studentId,
             gradeLevel: cls.gradeLevel,
             section: cls.section,
-            classId: cls.id,
+            enrollments: { create: { classId: cls.id } },
           },
         },
       },

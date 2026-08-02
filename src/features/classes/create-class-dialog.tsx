@@ -59,7 +59,7 @@ export function CreateClassDialog() {
           <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="name">Class Name</Label>
-              <Input id="name" placeholder="Grade 11 STEM A" {...register("name")} />
+              <Input id="name" placeholder="Grade & Section-Subject" {...register("name")} />
               {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">

@@ -1,8 +1,19 @@
 import { createClient } from "@supabase/supabase-js";
 import { ALLOWED_FILE_TYPES, MAX_UPLOAD_BYTES } from "@/lib/validations/academic";
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Trailing slashes or stray whitespace in SUPABASE_URL (easy to introduce
+// when copy-pasting from Supabase's dashboard) produce malformed request
+// paths and surface as a cryptic "PGRST125: Invalid path specified in
+// request URL" error. Strip both defensively so a copy-paste slip doesn't
+// break every upload.
+const supabaseUrl = (process.env.SUPABASE_URL ?? "").trim().replace(/\/+$/, "");
+const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").trim();
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error(
+    "Supabase storage is not configured: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing."
+  );
+}
 
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   auth: { persistSession: false },

@@ -43,7 +43,7 @@ export default async function AnnouncementsPage({
               {
                 OR: [
                   { classId: null },
-                  { class: { students: { some: { id: user.studentProfileId } } } },
+                  { class: { enrollments: { some: { studentId: user.studentProfileId } } } },
                   { studentId: user.studentProfileId },
                 ],
               },

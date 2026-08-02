@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
   const rl = rateLimit(`upload:${session.user.id}`, { limit: 30, windowMs: 60 * 1000 });
   if (!rl.success) {
-    return NextResponse.json({ error: "Too many uploads — please slow down." }, { status: 429 });
+    return NextResponse.json({ error: "Too many uploads. Please slow down." }, { status: 429 });
   }
 
   const formData = await req.formData().catch(() => null);

@@ -54,7 +54,7 @@ export function DeleteAccountDialog({ role }: { role: "STUDENT" | "TEACHER" }) {
             This permanently deletes your account, profile, submissions, grades, and everything
             attached to it.
             {role === "TEACHER" &&
-              " This includes every class, lesson, and announcement you've created — your students will lose access to all of it."}{" "}
+              " This includes every class, lesson, and announcement you've created. Your students will lose access to all of it."}{" "}
             This can&apos;t be undone. Enter your password to confirm.
           </Dialog.Description>
 
