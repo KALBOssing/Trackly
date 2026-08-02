@@ -21,7 +21,7 @@ export default async function TeacherDashboardPage() {
     lateSubmissions,
     pathways,
   ] = await Promise.all([
-    prisma.studentProfile.count({ where: { class: { teacherId: teacherProfileId } } }),
+    prisma.studentProfile.count({ where: { enrollments: { some: { class: { teacherId: teacherProfileId } } } } }),
     prisma.class.count({ where: { teacherId: teacherProfileId } }),
     prisma.lesson.count({ where: { teacherId: teacherProfileId } }),
     prisma.lesson.count({ where: { teacherId: teacherProfileId, status: "PUBLISHED" } }),
@@ -37,7 +37,7 @@ export default async function TeacherDashboardPage() {
     prisma.pathway.findMany({
       include: {
         progress: {
-          where: { student: { class: { teacherId: teacherProfileId } } },
+          where: { student: { enrollments: { some: { class: { teacherId: teacherProfileId } } } } },
         },
       },
     }),
