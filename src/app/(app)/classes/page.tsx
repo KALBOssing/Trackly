@@ -5,6 +5,7 @@ import { CreateClassDialog } from "@/features/classes/create-class-dialog";
 import { ClassesGrid } from "@/features/classes/classes-grid";
 import { JoinClassSection } from "@/features/classes/join-class-section";
 import { PendingJoinRequests } from "@/features/classes/pending-join-requests";
+import { StudentGradeSectionForm } from "@/features/classes/student-grade-section-form";
 
 export default async function ClassesPage() {
   const user = await requireUser();
@@ -44,7 +45,11 @@ export default async function ClassesPage() {
   }
 
   // Student view — a student can be enrolled in several classes at once.
-  const [myEnrollments, availableClasses, myRequests] = await Promise.all([
+  const [myProfile, myEnrollments, availableClasses, myRequests] = await Promise.all([
+    prisma.studentProfile.findUnique({
+      where: { id: user.studentProfileId },
+      select: { gradeLevel: true, section: true },
+    }),
     prisma.enrollment.findMany({
       where: { studentId: user.studentProfileId },
       include: {
@@ -71,18 +76,26 @@ export default async function ClassesPage() {
     }),
   ]);
 
+  const hasGradeSection = !!myProfile?.gradeLevel && !!myProfile?.section;
+
   return (
     <>
       <Topbar title="Classes" name={user.name ?? ""} />
       <div className="space-y-6 p-6">
-        {myEnrollments.length > 0 && (
-          <ClassesGrid
-            classes={myEnrollments.map((e) => e.class)}
-            canFilterByStatus={false}
-            showLeaveButton
-          />
+        {!hasGradeSection ? (
+          <StudentGradeSectionForm defaultValues={myProfile ?? undefined} />
+        ) : (
+          <>
+            {myEnrollments.length > 0 && (
+              <ClassesGrid
+                classes={myEnrollments.map((e) => e.class)}
+                canFilterByStatus={false}
+                showLeaveButton
+              />
+            )}
+            <JoinClassSection availableClasses={availableClasses} myRequests={myRequests} />
+          </>
         )}
-        <JoinClassSection availableClasses={availableClasses} myRequests={myRequests} />
       </div>
     </>
   );

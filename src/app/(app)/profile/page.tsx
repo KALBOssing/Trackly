@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "@/features/profile/profile-form";
 import { ProfilePictureUploader } from "@/features/profile/profile-picture-uploader";
 import { DeleteAccountDialog } from "@/features/profile/delete-account-dialog";
+import { StudentGradeSectionForm } from "@/features/classes/student-grade-section-form";
 import { Trophy } from "lucide-react";
 
 export default async function ProfilePage() {
@@ -75,6 +76,15 @@ export default async function ProfilePage() {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {dbUser.studentProfile && (
+          <StudentGradeSectionForm
+            defaultValues={{
+              gradeLevel: dbUser.studentProfile.gradeLevel,
+              section: dbUser.studentProfile.section,
+            }}
+          />
         )}
 
         <Card>

@@ -23,7 +23,7 @@ type StudentOption = { id: string; name: string; classIds: string[] };
 type ExistingLesson = {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   objectives: string | null;
   subject: string | null;
   status: "DRAFT" | "SCHEDULED" | "PUBLISHED" | "CLOSED" | "ARCHIVED";
@@ -54,6 +54,7 @@ const emptyPathway: LessonPathwayConfigInput = {
   points: 100,
   allowResubmission: false,
   required: true,
+  resources: [],
 };
 
 export function LessonForm({
@@ -84,7 +85,7 @@ export function LessonForm({
     defaultValues: existing
       ? {
           title: existing.title,
-          description: existing.description,
+          description: existing.description ?? "",
           objectives: existing.objectives ?? "",
           subject: existing.subject ?? "",
           availableAt: existing.availableAt ?? "",
@@ -210,12 +211,12 @@ export function LessonForm({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="description">Description</Label>
-            <Textarea id="description" rows={2} {...register("description", { required: true })} />
+            <Label htmlFor="description">Description (Optional)</Label>
+            <Textarea id="description" rows={2} {...register("description")} />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="objectives">Learning Objectives</Label>
+            <Label htmlFor="objectives">Learning Objectives (Optional)</Label>
             <Textarea id="objectives" rows={2} {...register("objectives")} />
           </div>
 
@@ -347,8 +348,6 @@ export function LessonForm({
                   </SelectContent>
                 </Select>
 
-                <Input placeholder="Pathway title" {...register(`pathways.${index}.title`, { required: true })} />
-
                 <RichTextEditor
                   value={watch(`pathways.${index}.instructions`) ?? ""}
                   onChange={(html) => setValue(`pathways.${index}.instructions`, html)}
@@ -388,6 +387,38 @@ export function LessonForm({
                     />
                     Allow resubmission
                   </label>
+                </div>
+
+                <div className="space-y-1.5 pt-1">
+                  <Label>Pathway Files (optional)</Label>
+                  {(watch(`pathways.${index}.resources`) ?? []).map((f, fi) => (
+                    <div key={f.fileUrl} className="flex items-center gap-2 rounded-md border border-border p-2 text-sm">
+                      <span className="flex-1 truncate">{f.fileName}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const current = watch(`pathways.${index}.resources`) ?? [];
+                          setValue(
+                            `pathways.${index}.resources`,
+                            current.filter((_, idx) => idx !== fi)
+                          );
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ))}
+                  <FileDropzone
+                    onUploaded={(f) => {
+                      const current = watch(`pathways.${index}.resources`) ?? [];
+                      setValue(`pathways.${index}.resources`, [
+                        ...current,
+                        { fileName: f.fileName, fileUrl: f.url, fileType: f.fileType, fileSizeBytes: f.fileSizeBytes },
+                      ]);
+                    }}
+                  />
                 </div>
               </div>
             ))}

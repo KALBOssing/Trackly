@@ -13,19 +13,6 @@ export const classSchema = z.object({
 });
 export type ClassInput = z.infer<typeof classSchema>;
 
-export const lessonPathwayConfigSchema = z.object({
-  pathwayId: z.string().min(1, "Select a pathway"),
-  title: z.string().min(1, "Pathway title is required").max(120),
-  instructions: z.string().min(1, "Instructions are required"),
-  requirements: z.string().max(2000).optional().or(z.literal("")),
-  rubric: z.string().max(4000).optional().or(z.literal("")),
-  points: z.coerce.number().int().min(1).max(1000).default(100),
-  dueDateOverride: optionalDate(),
-  allowResubmission: z.boolean().default(false),
-  required: z.boolean().default(true),
-});
-export type LessonPathwayConfigInput = z.infer<typeof lessonPathwayConfigSchema>;
-
 const uploadedFileSchema = z.object({
   fileName: z.string().min(1),
   fileUrl: z.string().url(),
@@ -33,9 +20,23 @@ const uploadedFileSchema = z.object({
   fileSizeBytes: z.number().int().positive(),
 });
 
+export const lessonPathwayConfigSchema = z.object({
+  pathwayId: z.string().min(1, "Select a pathway"),
+  title: z.string().max(120).optional(),
+  instructions: z.string().min(1, "Instructions are required"),
+  requirements: z.string().max(2000).optional().or(z.literal("")),
+  rubric: z.string().max(4000).optional().or(z.literal("")),
+  points: z.coerce.number().int().min(1).max(1000).default(100),
+  dueDateOverride: optionalDate(),
+  allowResubmission: z.boolean().default(false),
+  required: z.boolean().default(true),
+  resources: z.array(uploadedFileSchema).optional().default([]),
+});
+export type LessonPathwayConfigInput = z.infer<typeof lessonPathwayConfigSchema>;
+
 export const lessonSchema = z.object({
   title: z.string().min(1, "Title is required").max(120),
-  description: z.string().min(1, "Description is required").max(2000),
+  description: z.string().max(2000).optional().or(z.literal("")),
   objectives: z.string().max(2000).optional().or(z.literal("")),
   subject: z.string().min(1, "Select a subject"),
   classIds: z.array(z.string().min(1)).min(1, "Select at least one class"),

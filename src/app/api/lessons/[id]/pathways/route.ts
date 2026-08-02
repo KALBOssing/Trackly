@@ -23,13 +23,16 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: "Invalid input", issues: parsed.error.flatten() }, { status: 400 });
   }
 
+  const pathway = await prisma.pathway.findUnique({ where: { id: parsed.data.pathwayId } });
+  if (!pathway) return NextResponse.json({ error: "Pathway not found" }, { status: 404 });
+
   const count = await prisma.lessonPathway.count({ where: { lessonId: lesson.id } });
 
   const lessonPathway = await prisma.lessonPathway.create({
     data: {
       lessonId: lesson.id,
       pathwayId: parsed.data.pathwayId,
-      title: parsed.data.title,
+      title: parsed.data.title || pathway.name,
       instructions: parsed.data.instructions,
       requirements: parsed.data.requirements || null,
       rubric: parsed.data.rubric || null,
@@ -38,6 +41,15 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       allowResubmission: parsed.data.allowResubmission,
       required: parsed.data.required,
       order: count,
+      resources: {
+        create: parsed.data.resources.map((r, rOrder) => ({
+          fileName: r.fileName,
+          fileUrl: r.fileUrl,
+          fileType: r.fileType,
+          fileSizeBytes: r.fileSizeBytes,
+          order: rOrder,
+        })),
+      },
     },
   });
 

@@ -12,6 +12,7 @@ import { SubmissionComments } from "@/features/lessons/submission-comments";
 import { DeletableFileRow } from "@/features/uploads/deletable-file-row";
 import { LessonActionsMenu } from "@/features/lessons/lesson-actions-menu";
 import { AddPathwayDialog } from "@/features/lessons/add-pathway-dialog";
+import { PathwayResourcesManager } from "@/features/lessons/pathway-resources-manager";
 import { formatDate, formatDateTime, initials } from "@/lib/utils";
 
 const statusStyles: Record<string, string> = {
@@ -38,7 +39,7 @@ export default async function LessonDetailPage({ params }: { params: { id: strin
     where: { id: params.id },
     include: {
       resources: { orderBy: { order: "asc" } },
-      pathways: { include: { pathway: true }, orderBy: { order: "asc" } },
+      pathways: { include: { pathway: true, resources: { orderBy: { order: "asc" } } }, orderBy: { order: "asc" } },
     },
   });
   if (!lesson) notFound();
@@ -124,7 +125,7 @@ export default async function LessonDetailPage({ params }: { params: { id: strin
               <CardTitle>Pathways ({lesson.pathways.length})</CardTitle>
               <AddPathwayDialog lessonId={lesson.id} pathwayCatalog={pathwayCatalog} />
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-3">
               {lesson.pathways.map((p) => (
                 <div key={p.id} className="rounded-md border border-border p-3 text-sm">
                   <p className="font-medium">{p.title}</p>
@@ -132,6 +133,9 @@ export default async function LessonDetailPage({ params }: { params: { id: strin
                     {p.pathway.name} · {p.points} pts · {p.required ? "Required" : "Optional"}
                     {p.allowResubmission && " · Resubmission allowed"}
                   </p>
+                  <div className="mt-2">
+                    <PathwayResourcesManager lessonPathwayId={p.id} resources={p.resources} />
+                  </div>
                 </div>
               ))}
             </CardContent>
@@ -246,6 +250,19 @@ export default async function LessonDetailPage({ params }: { params: { id: strin
               <CardContent className="space-y-4">
                 <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: p.instructions }} />
                 {p.requirements && <p className="text-sm text-muted-foreground">{p.requirements}</p>}
+                {p.resources.length > 0 && (
+                  <div className="space-y-1">
+                    {p.resources.map((r) => (
+                      <a
+                        key={r.id}
+                        href={r.fileUrl}
+                        className="block rounded-md border border-border p-2 text-sm text-primary hover:underline"
+                      >
+                        {r.fileName}
+                      </a>
+                    ))}
+                  </div>
+                )}
 
                 {submission?.grade ? (
                   <div className="rounded-md border border-border p-4">

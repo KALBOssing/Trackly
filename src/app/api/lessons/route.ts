@@ -71,10 +71,16 @@ export async function POST(req: Request) {
 
   const status = data.status === "PUBLISHED" && data.publishAt ? "SCHEDULED" : data.status;
 
+  const pathwayCatalog = await prisma.pathway.findMany({
+    where: { id: { in: data.pathways.map((p) => p.pathwayId) } },
+    select: { id: true, name: true },
+  });
+  const pathwayNameById = new Map(pathwayCatalog.map((p) => [p.id, p.name]));
+
   const lesson = await prisma.lesson.create({
     data: {
       title: data.title,
-      description: data.description,
+      description: data.description || null,
       objectives: data.objectives || null,
       subject: data.subject,
       teacherId: session.user.teacherProfileId!,
@@ -94,7 +100,7 @@ export async function POST(req: Request) {
       pathways: {
         create: data.pathways.map((p, order) => ({
           pathwayId: p.pathwayId,
-          title: p.title,
+          title: p.title || pathwayNameById.get(p.pathwayId) || "Pathway",
           instructions: p.instructions,
           requirements: p.requirements || null,
           rubric: p.rubric || null,
@@ -103,6 +109,15 @@ export async function POST(req: Request) {
           allowResubmission: p.allowResubmission,
           required: p.required,
           order,
+          resources: {
+            create: p.resources.map((r, rOrder) => ({
+              fileName: r.fileName,
+              fileUrl: r.fileUrl,
+              fileType: r.fileType,
+              fileSizeBytes: r.fileSizeBytes,
+              order: rOrder,
+            })),
+          },
         })),
       },
       resources: {

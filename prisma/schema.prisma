@@ -261,7 +261,7 @@ model Progress {
 model Lesson {
   id          String       @id @default(cuid())
   title       String
-  description String       @db.Text
+  description String?      @db.Text
   objectives  String?      @db.Text
   subject     String   @default("General")
   teacherId   String
@@ -330,6 +330,7 @@ model LessonPathway {
   order             Int      @default(0)
 
   submissions Submission[]
+  resources   PathwayResource[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -337,6 +338,23 @@ model LessonPathway {
   @@index([lessonId])
   @@index([pathwayId])
   @@map("lesson_pathways")
+}
+
+// Files a teacher attaches directly to a pathway's activity (separate from
+// LessonResource, which is lesson-wide material shown before any pathway).
+model PathwayResource {
+  id              String        @id @default(cuid())
+  lessonPathwayId String
+  lessonPathway   LessonPathway @relation(fields: [lessonPathwayId], references: [id], onDelete: Cascade)
+  fileName        String
+  fileUrl         String
+  fileType        String
+  fileSizeBytes   Int
+  order           Int           @default(0)
+  uploadedAt      DateTime      @default(now())
+
+  @@index([lessonPathwayId])
+  @@map("pathway_resources")
 }
 
 // Learning materials attached directly to a lesson (not a specific

@@ -8,9 +8,11 @@ import { toast } from "sonner";
 import { Plus, Loader2 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { classSchema, type ClassInput } from "@/lib/validations/academic";
+import { GRADE_LEVELS } from "@/lib/constants/grades";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 export function CreateClassDialog() {
   const router = useRouter();
@@ -20,6 +22,8 @@ export function CreateClassDialog() {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<ClassInput>({ resolver: zodResolver(classSchema) });
 
@@ -65,7 +69,18 @@ export function CreateClassDialog() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="gradeLevel">Grade Level</Label>
-                <Input id="gradeLevel" placeholder="Grade 11" {...register("gradeLevel")} />
+                <Select onValueChange={(v) => setValue("gradeLevel", v)} value={watch("gradeLevel")}>
+                  <SelectTrigger id="gradeLevel">
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GRADE_LEVELS.map((g) => (
+                      <SelectItem key={g} value={g}>
+                        {g}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {errors.gradeLevel && <p className="text-xs text-destructive">{errors.gradeLevel.message}</p>}
               </div>
               <div className="space-y-1.5">
