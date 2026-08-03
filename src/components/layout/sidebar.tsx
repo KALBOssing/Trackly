@@ -14,6 +14,7 @@ import {
   LogOut,
   Bell,
   ScrollText,
+  ShieldCheck,
   UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -40,7 +41,7 @@ const teacherLinks = [
   { href: "/profile", label: "Profile", icon: UserCircle },
 ];
 
-export function Sidebar({ role }: { role: "STUDENT" | "TEACHER" }) {
+export function Sidebar({ role, isAdmin }: { role: "STUDENT" | "TEACHER"; isAdmin?: boolean }) {
   const pathname = usePathname();
   const links = role === "TEACHER" ? teacherLinks : studentLinks;
 
@@ -69,6 +70,14 @@ export function Sidebar({ role }: { role: "STUDENT" | "TEACHER" }) {
           );
         })}
       </nav>
+      {isAdmin && (
+        <Link
+          href="/admin"
+          className="mb-1 flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
+        >
+          <ShieldCheck className="h-4 w-4" /> Admin
+        </Link>
+      )}
       <button
         onClick={() => signOut({ callbackUrl: "/" })}
         className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"

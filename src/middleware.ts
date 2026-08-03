@@ -12,6 +12,9 @@ export default withAuth(
     if (pathname.startsWith("/student") && role !== "STUDENT") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
+    if (pathname.startsWith("/admin") && !req.nextauth.token?.isAdmin) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
     return NextResponse.next();
   },
   {
@@ -35,5 +38,6 @@ export const config = {
     "/audit-log/:path*",
     "/profile/:path*",
     "/settings/:path*",
+    "/admin/:path*",
   ],
 };

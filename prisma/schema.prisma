@@ -92,6 +92,7 @@ model User {
   darkMode            Boolean   @default(false)
   themeColor          String    @default("blue")
   notificationsOptIn  Boolean   @default(true)
+  suspended           Boolean   @default(false)
   emailVerified       DateTime?
   emailVerifyToken    String?
   resetToken          String?

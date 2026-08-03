@@ -9,6 +9,8 @@ declare module "next-auth" {
       role: Role;
       studentProfileId?: string;
       teacherProfileId?: string;
+      isAdmin?: boolean;
+      impersonatedBy?: string;
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -19,6 +21,7 @@ declare module "next-auth" {
     role: Role;
     studentProfileId?: string;
     teacherProfileId?: string;
+    isAdmin?: boolean;
   }
 }
 
@@ -28,5 +31,7 @@ declare module "next-auth/jwt" {
     role: Role;
     studentProfileId?: string;
     teacherProfileId?: string;
+    isAdmin?: boolean;
+    impersonatedBy?: string;
   }
 }

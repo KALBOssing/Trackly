@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { loginSchema } from "@/lib/validations/auth";
+import { isAdminEmail } from "@/lib/admin";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -34,6 +35,7 @@ export const authOptions: NextAuthOptions = {
           include: { studentProfile: true, teacherProfile: true },
         });
         if (!user) return null;
+        if (user.suspended) return null;
 
         const valid = await verifyPassword(parsed.data.password, user.passwordHash);
         if (!valid) return null;
@@ -46,6 +48,7 @@ export const authOptions: NextAuthOptions = {
           image: user.profilePictureUrl ?? undefined,
           studentProfileId: user.studentProfile?.id,
           teacherProfileId: user.teacherProfile?.id,
+          isAdmin: isAdminEmail(user.email),
         } as any;
       },
     }),
@@ -57,6 +60,7 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role;
         token.studentProfileId = (user as any).studentProfileId;
         token.teacherProfileId = (user as any).teacherProfileId;
+        token.isAdmin = (user as any).isAdmin;
       }
       return token;
     },
@@ -66,6 +70,8 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role = token.role;
         (session.user as any).studentProfileId = token.studentProfileId;
         (session.user as any).teacherProfileId = token.teacherProfileId;
+        (session.user as any).isAdmin = token.isAdmin;
+        (session.user as any).impersonatedBy = token.impersonatedBy;
       }
       return session;
     },
