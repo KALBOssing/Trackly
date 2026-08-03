@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "Trackly: GLOW Pathways Progress Tracking",
   description:
     "A modern learning management and progress tracking system for schools running the GLOW Pathways program.",
+  verification: {
+    google: "9sWFFWWgy5X02aVWft7x3S2rW7ZvDMH19NlHEW1R56g",
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
