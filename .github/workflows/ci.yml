@@ -65,6 +65,11 @@ jobs:
       DIRECT_URL: postgresql://postgres:postgres@localhost:5432/trackly?schema=public
       NEXTAUTH_URL: http://localhost:3000
       NEXTAUTH_SECRET: ci-build-secret-not-for-production
+      # Placeholders so the storage client can be created while Next.js collects page data; CI never uploads.
+      SUPABASE_URL: https://placeholder.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-key
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
