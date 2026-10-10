@@ -1,3 +1,4 @@
+import { emailVerificationRequired, needsEmailVerification } from "@/lib/email-verification";
 import { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
@@ -39,6 +40,12 @@ export const authOptions: NextAuthOptions = {
 
         const valid = await verifyPassword(parsed.data.password, user.passwordHash);
         if (!valid) return null;
+
+        // Checked after the password so the "unverified" message is only ever
+        // shown to someone who actually knows the password.
+        if (needsEmailVerification(user, emailVerificationRequired())) {
+          throw new Error("EMAIL_NOT_VERIFIED");
+        }
 
         return {
           id: user.id,

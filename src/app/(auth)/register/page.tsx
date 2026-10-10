@@ -47,8 +47,13 @@ export default function RegisterPage() {
         toast.error(json.error ?? "Registration failed");
         return;
       }
-      toast.success("Account created! You can now sign in.");
-      router.push("/login");
+      if (json.verificationRequired) {
+        toast.success("Account created! Check your email to verify your address, then sign in.");
+        router.push(`/login?verify=sent&email=${encodeURIComponent(data.email)}`);
+      } else {
+        toast.success("Account created! You can now sign in.");
+        router.push("/login");
+      }
     } finally {
       setLoading(false);
     }

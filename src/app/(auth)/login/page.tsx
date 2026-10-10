@@ -7,7 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
-import { GraduationCap, Loader2 } from "lucide-react";
+import { GraduationCap, Loader2, MailWarning } from "lucide-react";
+import { ResendVerification } from "@/features/auth/resend-verification";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,8 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(searchParams.get("verify") === "sent" ? (searchParams.get("email") ?? "") : null);
+  const justRegistered = searchParams.get("verify") === "sent";
   const {
     register,
     handleSubmit,
@@ -41,6 +44,11 @@ function LoginForm() {
     });
     setLoading(false);
 
+    if (res?.error === "EMAIL_NOT_VERIFIED") {
+      setUnverifiedEmail(data.email);
+      toast.error("Please verify your email address before signing in.");
+      return;
+    }
     if (res?.error) {
       toast.error("Invalid email or password");
       return;
@@ -61,6 +69,22 @@ function LoginForm() {
           <CardDescription>Sign in to continue to your dashboard</CardDescription>
         </CardHeader>
         <CardContent>
+          {unverifiedEmail !== null && (
+            <div role="status" className="mb-5 space-y-3 rounded-md border border-border bg-accent/50 p-4 text-sm">
+              <p className="flex items-start gap-2 font-medium text-accent-foreground">
+                <MailWarning className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                {justRegistered && unverifiedEmail
+                  ? `We sent a verification link to ${unverifiedEmail}. Click it, then sign in.`
+                  : "Verify your email to sign in. Check your inbox for the link we sent."}
+              </p>
+              <details>
+                <summary className="cursor-pointer text-muted-foreground hover:text-foreground">Didn&apos;t get it?</summary>
+                <div className="mt-3">
+                  <ResendVerification defaultEmail={unverifiedEmail} />
+                </div>
+              </details>
+            </div>
+          )}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>

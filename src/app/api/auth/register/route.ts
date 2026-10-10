@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/password";
 import { registerSchema } from "@/lib/validations/auth";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { sendVerificationEmail } from "@/lib/email";
+import { emailVerificationRequired, newVerificationExpiry } from "@/lib/email-verification";
 import crypto from "crypto";
 
 export async function POST(req: Request) {
@@ -56,6 +57,7 @@ export async function POST(req: Request) {
         middleName: data.middleName || null,
         lastName: data.lastName,
         emailVerifyToken,
+        emailVerifyExpiresAt: newVerificationExpiry(),
         ...(data.role === "STUDENT"
           ? {
               studentProfile: {
@@ -90,5 +92,8 @@ export async function POST(req: Request) {
 
   await sendVerificationEmail(email, emailVerifyToken);
 
-  return NextResponse.json({ success: true, userId: user.id }, { status: 201 });
+  return NextResponse.json(
+    { success: true, userId: user.id, verificationRequired: emailVerificationRequired() },
+    { status: 201 }
+  );
 }

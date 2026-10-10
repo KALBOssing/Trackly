@@ -23,8 +23,10 @@ export async function sendVerificationEmail(to: string, token: string) {
   await send(
     to,
     "Verify your Trackly account",
-    `<p>Welcome to Trackly! Please confirm your email address:</p>
-     <p><a href="${link}">${link}</a></p>`
+    `<p>Welcome to Trackly! Please confirm your email address to finish creating your account:</p>
+     <p><a href="${link}">Verify my email</a></p>
+     <p>Or copy this link into your browser:<br>${link}</p>
+     <p>This link expires in 24 hours. If you didn't create a Trackly account, you can ignore this email.</p>`
   );
 }
 
