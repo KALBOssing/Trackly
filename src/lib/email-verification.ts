@@ -2,7 +2,7 @@
 //
 // Two safety valves keep this from locking anyone out:
 //  1. Verification is only enforced when email can actually be delivered
-//     (RESEND_API_KEY is set). Without it the verification email is only logged,
+//     (BREVO_API_KEY or RESEND_API_KEY is set). Without it the verification email is only logged,
 //     so requiring it would make every new account unusable.
 //  2. Only accounts created under this flow carry an `emailVerifyExpiresAt`.
 //     Older accounts have NULL there and are treated as already trusted.
@@ -10,7 +10,7 @@
 export const VERIFY_TTL_MS = 24 * 60 * 60 * 1000;
 
 export function emailVerificationRequired(env: Record<string, string | undefined> = process.env): boolean {
-  return Boolean(env.RESEND_API_KEY) && env.EMAIL_VERIFICATION_REQUIRED !== "false";
+  return Boolean(env.BREVO_API_KEY || env.RESEND_API_KEY) && env.EMAIL_VERIFICATION_REQUIRED !== "false";
 }
 
 export function newVerificationExpiry(now: number = Date.now()): Date {

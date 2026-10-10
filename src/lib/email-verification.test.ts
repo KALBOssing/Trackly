@@ -16,6 +16,9 @@ describe("emailVerificationRequired", () => {
   it("is on when an email provider is configured", () => {
     expect(emailVerificationRequired({ RESEND_API_KEY: "re_123" })).toBe(true);
   });
+  it("is on when Brevo is configured instead", () => {
+    expect(emailVerificationRequired({ BREVO_API_KEY: "xkeysib-123" })).toBe(true);
+  });
   it("can be switched off explicitly", () => {
     expect(emailVerificationRequired({ RESEND_API_KEY: "re_123", EMAIL_VERIFICATION_REQUIRED: "false" })).toBe(false);
   });
