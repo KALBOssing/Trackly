@@ -13,7 +13,7 @@
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted-foreground: 215 16% 42%;
     --accent: 217 91% 96%;
     --accent-foreground: 217 91% 30%;
     --destructive: 0 84% 60%;
@@ -56,11 +56,12 @@
     --accent: 262 50% 22%;
   }
 
+  /* Darkened from the original so white button text passes 4.5:1. */
   [data-theme="green"] {
-    --primary: 142 71% 40%;
-    --ring: 142 71% 40%;
+    --primary: 142 72% 29%;
+    --ring: 142 72% 29%;
     --accent: 142 71% 95%;
-    --accent-foreground: 142 71% 25%;
+    --accent-foreground: 142 71% 20%;
   }
   [data-theme="green"].dark {
     --primary: 142 60% 52%;
@@ -80,11 +81,13 @@
     --accent: 346 40% 22%;
   }
 
+  /* Amber is too light for white text, so buttons use dark text instead. */
   [data-theme="amber"] {
     --primary: 38 92% 50%;
-    --ring: 38 92% 50%;
+    --primary-foreground: 222 47% 11%;
+    --ring: 38 92% 40%;
     --accent: 38 92% 95%;
-    --accent-foreground: 38 92% 28%;
+    --accent-foreground: 38 92% 22%;
   }
   [data-theme="amber"].dark {
     --primary: 38 92% 58%;
@@ -108,9 +111,38 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Page and section titles use the display face; dense UI text stays in the body face. */
+  h1,
+  h2 {
+    @apply font-display;
+  }
+
+  /* Visible keyboard focus everywhere, even on elements that forget to style it. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 

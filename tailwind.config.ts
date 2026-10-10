@@ -10,10 +10,15 @@ const config: Config = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: { DEFAULT: "1.25rem", sm: "2rem" },
       screens: { "2xl": "1400px" },
     },
     extend: {
+      fontFamily: {
+        // Variables are injected by next/font in src/app/layout.tsx.
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-body)", "system-ui", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -62,11 +67,13 @@ const config: Config = {
         "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },
         "accordion-up": { from: { height: "var(--radix-accordion-content-height)" }, to: { height: "0" } },
         "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
+        "bar-grow": { from: { transform: "scaleX(0)" }, to: { transform: "scaleX(1)" } },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
+        "bar-grow": "bar-grow 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both",
       },
     },
   },

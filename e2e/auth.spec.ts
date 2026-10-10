@@ -8,7 +8,7 @@ test.describe("Authentication", () => {
     await page.getByLabel("First Name").fill("E2E");
     await page.getByLabel("Last Name").fill("Student");
     await page.getByLabel("Email").fill(`e2e.student.${uniqueSuffix}@trackly.edu`);
-    await page.getByLabel("Student ID").fill(`E2E${uniqueSuffix}`);
+    await page.getByLabel("Student ID").fill(String(uniqueSuffix));
     await page.getByLabel("Grade Level").fill("Grade 11");
     await page.getByLabel("Section").fill("STEM A");
     await page.getByLabel("Password", { exact: true }).fill("Password!123");

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const body = Figtree({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Trackly: GLOW Pathways Progress Tracking",
@@ -32,7 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={prefs?.darkMode ? "dark" : undefined}
       data-theme={prefs?.themeColor ?? "blue"}
     >
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${body.variable} ${display.variable} font-sans antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>
