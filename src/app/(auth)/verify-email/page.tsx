@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { GraduationCap, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { verificationTokenState } from "@/lib/email-verification";
 import { ResendVerification } from "@/features/auth/resend-verification";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { AuthShell, AuthHeading } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 
 type Outcome = "success" | "expired" | "invalid";
@@ -41,26 +41,24 @@ export default async function VerifyEmailPage({
     invalid: { title: "Verification failed", text: "This link isn't valid. Request a new one below, or sign in if you've already verified." },
   }[outcome];
 
+  const icon =
+    outcome === "success" ? (
+      <CheckCircle2 className="mb-5 h-12 w-12 text-emerald-500" aria-hidden="true" />
+    ) : outcome === "expired" ? (
+      <Clock className="mb-5 h-12 w-12 text-amber-500" aria-hidden="true" />
+    ) : (
+      <XCircle className="mb-5 h-12 w-12 text-destructive" aria-hidden="true" />
+    );
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-secondary/30 px-4">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <Link href="/" className="mx-auto mb-2 flex items-center gap-2 font-display text-lg font-semibold">
-            <GraduationCap className="h-6 w-6 text-primary" aria-hidden="true" /> Trackly
-          </Link>
-          {outcome === "success" && <CheckCircle2 className="mx-auto h-10 w-10 text-green-600" aria-hidden="true" />}
-          {outcome === "expired" && <Clock className="mx-auto h-10 w-10 text-amber-600" aria-hidden="true" />}
-          {outcome === "invalid" && <XCircle className="mx-auto h-10 w-10 text-destructive" aria-hidden="true" />}
-          <CardTitle className="mt-2">{copy.title}</CardTitle>
-          <CardDescription>{copy.text}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {outcome !== "success" && <ResendVerification defaultEmail={email} />}
-          <Button asChild variant={outcome === "success" ? "default" : "ghost"}>
-            <Link href="/login">Continue to login</Link>
-          </Button>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthShell>
+      <AuthHeading title={copy.title} description={copy.text} icon={icon} className="mb-6" />
+      <div className="space-y-4">
+        {outcome !== "success" && <ResendVerification defaultEmail={email} />}
+        <Button asChild variant={outcome === "success" ? "default" : "ghost"} className="w-full">
+          <Link href="/login">Continue to login</Link>
+        </Button>
+      </div>
+    </AuthShell>
   );
 }

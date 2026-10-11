@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { Topbar } from "@/components/layout/topbar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CompletionBarChart } from "@/components/charts/completion-bar-chart";
+import { Stagger, StaggerItem } from "@/components/motion/reveal";
+import { CountUp } from "@/components/motion/count-up";
 import { Users, BookOpenCheck, ClipboardList, Clock, FileEdit, CalendarClock, Megaphone } from "lucide-react";
 
 export default async function TeacherDashboardPage() {
@@ -66,24 +68,29 @@ export default async function TeacherDashboardPage() {
     <>
       <Topbar title="Teacher Dashboard" name={user.name ?? "Teacher"} />
       <div className="space-y-6 p-6">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Stagger onMount stagger={0.05} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
-            <Card key={s.label}>
+            <StaggerItem key={s.label}>
+            <Card className="card-interactive h-full">
               <CardContent className="flex items-center justify-between pt-6">
                 <div>
                   <p className="text-sm text-muted-foreground">{s.label}</p>
-                  <p className="mt-1 text-2xl font-bold">{s.value}</p>
+                  <p className="mt-1 font-display text-2xl font-bold">
+                    <CountUp value={s.value} />
+                  </p>
                 </div>
                 <div className="flex h-10 w-10 items-center justify-center rounded-md bg-accent">
                   <s.icon className="h-5 w-5 text-primary" />
                 </div>
               </CardContent>
             </Card>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
+        <Stagger onMount delay={0.3} className="grid gap-6 lg:grid-cols-3">
+          <StaggerItem className="lg:col-span-2">
+          <Card className="h-full">
             <CardHeader>
               <CardTitle>Pathway Completion</CardTitle>
               <CardDescription>Average completion across your students, by pathway</CardDescription>
@@ -92,20 +99,25 @@ export default async function TeacherDashboardPage() {
               <CompletionBarChart data={chartData} />
             </CardContent>
           </Card>
+          </StaggerItem>
 
-          <Card>
+          <StaggerItem>
+          <Card className="h-full">
             <CardHeader>
               <CardTitle>Late Submissions</CardTitle>
               <CardDescription>Across all your lessons</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-4xl font-bold text-destructive">{lateSubmissions}</p>
+              <p className="font-display text-4xl font-bold text-destructive">
+                <CountUp value={lateSubmissions} />
+              </p>
               <p className="mt-2 text-sm text-muted-foreground">
                 Review the Lessons page to follow up with students.
               </p>
             </CardContent>
           </Card>
-        </div>
+          </StaggerItem>
+        </Stagger>
       </div>
     </>
   );

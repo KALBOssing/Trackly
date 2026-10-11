@@ -6,13 +6,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { GraduationCap, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { resetPasswordSchema } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { AuthShell, AuthHeading } from "@/components/auth/auth-shell";
 import { z } from "zod";
 
 type ResetInput = z.infer<typeof resetPasswordSchema>;
@@ -50,54 +50,45 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-secondary/30 px-4">
-        <Card className="w-full max-w-md text-center">
-          <CardHeader>
-            <CardTitle>Invalid link</CardTitle>
-            <CardDescription>
+      <AuthShell>
+        <AuthHeading
+          title="Invalid link"
+          description={
+            <>
               This reset link is missing its token.{" "}
               <Link href="/forgot-password" className="text-primary hover:underline">
                 Request a new one
               </Link>
               .
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </main>
+            </>
+          }
+        />
+      </AuthShell>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-secondary/30 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <Link href="/" className="mx-auto mb-2 flex items-center gap-2 font-semibold text-lg">
-            <GraduationCap className="h-6 w-6 text-primary" /> Trackly
-          </Link>
-          <CardTitle>Set a new password</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="password">New Password</Label>
-              <PasswordInput id="password" {...register("password")} />
-              {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <PasswordInput id="confirmPassword" {...register("confirmPassword")} />
-              {errors.confirmPassword && (
-                <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
-              )}
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Reset Password
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthShell>
+      <AuthHeading title="Set a new password" description="Choose a strong password you haven't used before." />
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="password">New Password</Label>
+          <PasswordInput id="password" {...register("password")} />
+          {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <PasswordInput id="confirmPassword" {...register("confirmPassword")} />
+          {errors.confirmPassword && (
+            <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
+          )}
+        </div>
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+          Reset Password
+        </Button>
+      </form>
+    </AuthShell>
   );
 }
 

@@ -90,10 +90,10 @@ export async function POST(req: Request) {
     data: { userId: user.id, action: "USER_REGISTERED", ipAddress: ip },
   });
 
-  await sendVerificationEmail(email, emailVerifyToken);
+  const emailSent = await sendVerificationEmail(email, emailVerifyToken);
 
   return NextResponse.json(
-    { success: true, userId: user.id, verificationRequired: emailVerificationRequired() },
+    { success: true, userId: user.id, verificationRequired: emailVerificationRequired(), emailSent },
     { status: 201 }
   );
 }
