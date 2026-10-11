@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { pathwayRequirementStatus } from "@/lib/pathway-status";
 import { formatDate } from "@/lib/utils";
 import { CalendarClock, Megaphone } from "lucide-react";
+import { Stagger, StaggerItem } from "@/components/motion/reveal";
+import { CountUp } from "@/components/motion/count-up";
+import { AnimatedBar, RingProgress } from "@/components/motion/progress";
 
 export default async function StudentDashboardPage() {
   const user = await requireRole("STUDENT");
@@ -73,30 +76,28 @@ export default async function StudentDashboardPage() {
     <>
       <Topbar title="Student Dashboard" name={user.name ?? "Student"} />
       <div className="space-y-6 p-6">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-1">
+        <Stagger onMount className="grid gap-6 lg:grid-cols-3">
+          <StaggerItem className="lg:col-span-1">
+          <Card className="h-full">
             <CardHeader>
               <CardTitle>Overall Progress</CardTitle>
               <CardDescription>{status.label}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
-              <div
-                className="relative flex h-40 w-40 items-center justify-center rounded-full"
-                style={{
-                  background: `conic-gradient(hsl(var(--primary)) ${overallPercentage * 3.6}deg, hsl(var(--secondary)) 0deg)`,
-                }}
-              >
-                <div className="flex h-32 w-32 items-center justify-center rounded-full bg-card text-2xl font-bold">
-                  {overallPercentage}%
-                </div>
-              </div>
+              <RingProgress value={overallPercentage} size={160} stroke={14}>
+                <span className="font-display text-3xl font-bold">
+                  <CountUp value={overallPercentage} suffix="%" />
+                </span>
+              </RingProgress>
               <p className="mt-4 text-sm text-muted-foreground">
                 {pathwaysCompleted} of {pathways.length} pathways completed
               </p>
             </CardContent>
           </Card>
+          </StaggerItem>
 
-          <Card className="lg:col-span-2">
+          <StaggerItem className="lg:col-span-2">
+          <Card className="h-full">
             <CardHeader>
               <CardTitle>GLOW Pathways</CardTitle>
               <CardDescription>Your progress across each pathway</CardDescription>
@@ -105,16 +106,13 @@ export default async function StudentDashboardPage() {
               {pathways.map((pw) => {
                 const pct = Math.round(progressByPathway.get(pw.id)?.completionPercentage ?? 0);
                 return (
-                  <div key={pw.id} className="rounded-md border border-border p-4">
+                  <div key={pw.id} className="card-interactive rounded-md border border-border p-4">
                     <div className="flex items-center justify-between text-sm font-medium">
                       <span>{pw.name}</span>
                       <span className="text-muted-foreground">{pct}%</span>
                     </div>
-                    <div className="mt-2 h-2 w-full rounded-full bg-secondary">
-                      <div
-                        className="h-2 rounded-full"
-                        style={{ width: `${pct}%`, backgroundColor: pw.color }}
-                      />
+                    <div className="mt-2">
+                      <AnimatedBar value={pct} color={pw.color} />
                     </div>
                   </div>
                 );
@@ -124,10 +122,12 @@ export default async function StudentDashboardPage() {
               )}
             </CardContent>
           </Card>
-        </div>
+          </StaggerItem>
+        </Stagger>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card>
+        <Stagger onMount delay={0.2} className="grid gap-6 lg:grid-cols-2">
+          <StaggerItem>
+          <Card className="h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <CalendarClock className="h-4 w-4" /> Assigned Lessons
@@ -142,7 +142,7 @@ export default async function StudentDashboardPage() {
                   <Link
                     key={l.id}
                     href={`/lessons/${l.id}`}
-                    className="block rounded-md border border-border p-3 text-sm hover:bg-secondary/50"
+                    className="card-interactive block rounded-md border border-border p-3 text-sm hover:bg-secondary/50"
                   >
                     <div className="flex items-center justify-between">
                       <p className="font-medium">{l.title}</p>
@@ -151,8 +151,8 @@ export default async function StudentDashboardPage() {
                     <p className="mt-1 text-xs text-muted-foreground">
                       {total} pathway{total === 1 ? "" : "s"} · {pct}% complete
                     </p>
-                    <div className="mt-2 h-1.5 w-full rounded-full bg-secondary">
-                      <div className="h-1.5 rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                    <div className="mt-2">
+                      <AnimatedBar value={pct} className="h-1.5" trackClassName="h-1.5" />
                     </div>
                   </Link>
                 );
@@ -162,8 +162,10 @@ export default async function StudentDashboardPage() {
               )}
             </CardContent>
           </Card>
+          </StaggerItem>
 
-          <Card>
+          <StaggerItem>
+          <Card className="h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Megaphone className="h-4 w-4" /> Recent Announcements
@@ -192,7 +194,8 @@ export default async function StudentDashboardPage() {
               )}
             </CardContent>
           </Card>
-        </div>
+          </StaggerItem>
+        </Stagger>
       </div>
     </>
   );

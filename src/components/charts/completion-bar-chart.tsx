@@ -13,7 +13,7 @@ export function CompletionBarChart({ data }: { data: { name: string; percentage:
           contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))" }}
           cursor={{ fill: "hsl(var(--secondary))" }}
         />
-        <Bar dataKey="percentage" fill="#2563EB" radius={[6, 6, 0, 0]} />
+        <Bar dataKey="percentage" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

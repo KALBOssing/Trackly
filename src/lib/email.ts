@@ -1,30 +1,69 @@
 import { Resend } from "resend";
 
+// Two providers are supported; Brevo is used if its key is set, otherwise Resend.
+//  - Resend: needs a domain you own and have verified.
+//  - Brevo: only needs one verified sender address (e.g. a Gmail), no domain.
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const brevoKey = process.env.BREVO_API_KEY ?? "";
 const FROM = process.env.EMAIL_FROM ?? "Trackly <no-reply@trackly.app>";
 const APP_URL = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 
-async function send(to: string, subject: string, html: string) {
+// "Trackly <me@gmail.com>" -> { name: "Trackly", email: "me@gmail.com" }
+function parseFrom(from: string): { name?: string; email: string } {
+  const m = from.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+  return m ? { name: m[1] || undefined, email: m[2] } : { email: from.trim() };
+}
+
+// Returns true only when the provider accepted the message. Errors are logged
+// (visible in Vercel's function logs) rather than thrown, so a mail outage never
+// breaks sign-up, but callers that care (verification) can tell the user.
+async function send(to: string, subject: string, html: string): Promise<boolean> {
+  if (brevoKey) {
+    try {
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": brevoKey, "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ sender: parseFrom(FROM), to: [{ email: to }], subject, htmlContent: html }),
+      });
+      if (!res.ok) {
+        console.error("[email] Brevo rejected the message:", res.status, await res.text());
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error("[email] Brevo request failed:", err);
+      return false;
+    }
+  }
   if (!resend) {
-    // No API key configured — log instead of throwing, so local dev/demo flows
+    // No provider configured — log instead of throwing, so local dev/demo flows
     // (register, forgot password) still work without email set up.
-    console.log(`[email:skipped — no RESEND_API_KEY] to=${to} subject="${subject}"`);
-    return;
+    console.log(`[email:skipped — no BREVO_API_KEY or RESEND_API_KEY] to=${to} subject="${subject}"`);
+    return false;
   }
   try {
-    await resend.emails.send({ from: FROM, to, subject, html });
+    // The Resend SDK returns { error } instead of throwing on API errors.
+    const { error } = await resend.emails.send({ from: FROM, to, subject, html });
+    if (error) {
+      console.error("[email] Resend rejected the message:", error);
+      return false;
+    }
+    return true;
   } catch (err) {
-    console.error("Failed to send email:", err);
+    console.error("[email] Resend request failed:", err);
+    return false;
   }
 }
 
-export async function sendVerificationEmail(to: string, token: string) {
+export async function sendVerificationEmail(to: string, token: string): Promise<boolean> {
   const link = `${APP_URL}/verify-email?token=${token}`;
-  await send(
+  return send(
     to,
     "Verify your Trackly account",
-    `<p>Welcome to Trackly! Please confirm your email address:</p>
-     <p><a href="${link}">${link}</a></p>`
+    `<p>Welcome to Trackly! Please confirm your email address to finish creating your account:</p>
+     <p><a href="${link}">Verify my email</a></p>
+     <p>Or copy this link into your browser:<br>${link}</p>
+     <p>This link expires in 24 hours. If you didn't create a Trackly account, you can ignore this email.</p>`
   );
 }
 

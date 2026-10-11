@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { GraduationCap, CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { verificationTokenState } from "@/lib/email-verification";
+import { ResendVerification } from "@/features/auth/resend-verification";
+import { AuthShell, AuthHeading } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
+
+type Outcome = "success" | "expired" | "invalid";
 
 export default async function VerifyEmailPage({
   searchParams,
@@ -10,44 +14,51 @@ export default async function VerifyEmailPage({
   searchParams: { token?: string };
 }) {
   const token = searchParams.token;
-  let success = false;
+  let outcome: Outcome = "invalid";
+  let email = "";
 
   if (token) {
     const user = await prisma.user.findFirst({ where: { emailVerifyToken: token } });
     if (user) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { emailVerified: new Date(), emailVerifyToken: null },
-      });
-      success = true;
+      email = user.email;
+      const state = verificationTokenState(user);
+      if (state === "verified") {
+        outcome = "success";
+      } else if (state === "valid") {
+        // The token is kept (not cleared) so a second click, or an email
+        // scanner that opened the link first, still shows success.
+        await prisma.user.update({ where: { id: user.id }, data: { emailVerified: new Date() } });
+        outcome = "success";
+      } else {
+        outcome = "expired";
+      }
     }
   }
 
+  const copy = {
+    success: { title: "Email verified", text: "Your email address is confirmed. You can sign in now." },
+    expired: { title: "This link has expired", text: "Verification links last 24 hours. Request a new one below." },
+    invalid: { title: "Verification failed", text: "This link isn't valid. Request a new one below, or sign in if you've already verified." },
+  }[outcome];
+
+  const icon =
+    outcome === "success" ? (
+      <CheckCircle2 className="mb-5 h-12 w-12 text-emerald-500" aria-hidden="true" />
+    ) : outcome === "expired" ? (
+      <Clock className="mb-5 h-12 w-12 text-amber-500" aria-hidden="true" />
+    ) : (
+      <XCircle className="mb-5 h-12 w-12 text-destructive" aria-hidden="true" />
+    );
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-secondary/30 px-4">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <Link href="/" className="mx-auto mb-2 flex items-center gap-2 font-semibold text-lg">
-            <GraduationCap className="h-6 w-6 text-primary" /> Trackly
-          </Link>
-          {success ? (
-            <CheckCircle2 className="mx-auto h-10 w-10 text-green-600" />
-          ) : (
-            <XCircle className="mx-auto h-10 w-10 text-destructive" />
-          )}
-          <CardTitle className="mt-2">{success ? "Email verified" : "Verification failed"}</CardTitle>
-          <CardDescription>
-            {success
-              ? "Your email address has been confirmed."
-              : "This verification link is invalid or has already been used."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button asChild>
-            <Link href="/login">Continue to login</Link>
-          </Button>
-        </CardContent>
-      </Card>
-    </main>
+    <AuthShell>
+      <AuthHeading title={copy.title} description={copy.text} icon={icon} className="mb-6" />
+      <div className="space-y-4">
+        {outcome !== "success" && <ResendVerification defaultEmail={email} />}
+        <Button asChild variant={outcome === "success" ? "default" : "ghost"} className="w-full">
+          <Link href="/login">Continue to login</Link>
+        </Button>
+      </div>
+    </AuthShell>
   );
 }

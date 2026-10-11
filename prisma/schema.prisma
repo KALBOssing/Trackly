@@ -95,6 +95,10 @@ model User {
   suspended           Boolean   @default(false)
   emailVerified       DateTime?
   emailVerifyToken    String?
+  // Set only for accounts created under the verification flow. Accounts that
+  // pre-date it have NULL here and are treated as already trusted, so turning
+  // verification on never locks existing users out.
+  emailVerifyExpiresAt DateTime?
   resetToken          String?
   resetTokenExpiresAt DateTime?
   createdAt           DateTime  @default(now())
