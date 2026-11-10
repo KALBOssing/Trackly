@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Bell, GraduationCap, Menu, X } from "lucide-react";
+import { Bell, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/brand/logo";
 import { NavLinks, type NavRole } from "@/components/layout/nav-links";
 
 // The desktop sidebar is hidden below the md breakpoint, so phones and small
@@ -41,8 +42,10 @@ export function MobileHeader({
             className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col overflow-y-auto border-r border-border bg-card px-4 py-6 shadow-lg focus:outline-none data-[state=open]:animate-in data-[state=open]:slide-in-from-left"
           >
             <div className="mb-6 flex items-center justify-between px-2">
-              <Dialog.Title className="flex items-center gap-2 font-display text-lg font-semibold">
-                <GraduationCap className="h-6 w-6 text-primary" aria-hidden="true" /> Trackly
+              <Dialog.Title asChild>
+                <span>
+                  <Logo markClassName="h-9 w-9" />
+                </span>
               </Dialog.Title>
               <Dialog.Close asChild>
                 <Button variant="ghost" size="icon" aria-label="Close menu">
@@ -55,8 +58,8 @@ export function MobileHeader({
         </Dialog.Portal>
       </Dialog.Root>
 
-      <Link href="/dashboard" className="flex items-center gap-2 font-display text-base font-semibold">
-        <GraduationCap className="h-5 w-5 text-primary" aria-hidden="true" /> Trackly
+      <Link href="/dashboard" aria-label="Trackly dashboard">
+        <Logo markClassName="h-7 w-7" textClassName="text-base" />
       </Link>
 
       <Button variant="ghost" size="icon" className="relative ml-auto" asChild>
