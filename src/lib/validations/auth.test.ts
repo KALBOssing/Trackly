@@ -19,7 +19,7 @@ describe("registerSchema", () => {
     const result = registerSchema.safeParse({
       ...base,
       role: "STUDENT",
-      studentId: "S00001",
+      studentId: "20240001",
     });
     expect(result.success).toBe(true);
   });
